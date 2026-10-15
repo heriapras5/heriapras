@@ -1,0 +1,245 @@
+/* Custom overrides untuk integrasi Laravel - di setelah main.css */
+
+/* Aksesibilitas */
+.skip-link {
+    position: absolute;
+    top: -60px;
+    left: 16px;
+    z-index: 9999;
+    padding: 10px 16px;
+    background: var(--accent-color, #149ddd);
+    color: #fff;
+    font-size: 14px;
+    border-radius: 0 0 6px 6px;
+    transition: top 0.2s;
+}
+
+.skip-link:focus {
+    top: 0;
+    color: #fff;
+}
+
+a:focus-visible,
+button:focus-visible,
+.header-toggle:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--accent-color, #149ddd);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+section[id],
+div[id] {
+    scroll-margin-top: 12px;
+}
+
+/* Logo di tengah sidebar publik (menggantikan foto profil lingkaran) */
+.sidebar-brand {
+    padding: 28px 15px 8px;
+}
+
+.sidebar-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.sidebar-logo-img {
+    display: block;
+    width: 96px;
+    height: 96px;
+    border-radius: 22px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    background: #151f2b;
+}
+
+.sidebar-brand .logo {
+    margin-top: 12px;
+    margin-bottom: 0;
+}
+
+/* Foto profil di sidebar publik */
+.sidebar-profile-img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 6px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    background: #151f2b;
+}
+
+/* Scrollbar modern untuk sidebar publik */
+.header {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.header::-webkit-scrollbar {
+    width: 6px;
+}
+
+.header::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.header::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+}
+
+.header::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-color, #149ddd);
+}
+
+/* Copyright di bawah sidebar publik */
+.sidebar-copyright {
+  padding: 16px 10px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.sidebar-copyright p {
+  margin: 0;
+}
+
+.sidebar-copyright strong {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+/* Fallback foto profil di sidebar */
+.profile-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 8px solid rgba(255, 255, 255, 0.15);
+    background: #151f2b;
+    color: var(--accent-color, #149ddd);
+    font-family: var(--heading-font, "Raleway", sans-serif);
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* Fallback foto about */
+.photo-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: #151f2b;
+    color: var(--accent-color, #149ddd);
+    font-family: var(--heading-font, "Raleway", sans-serif);
+    font-size: 72px;
+    font-weight: 700;
+}
+
+/* Fallback thumbnail project */
+.portfolio-thumb-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    padding: 24px;
+    text-align: center;
+    background: linear-gradient(180deg, #0d1726 0%, #151f2b 100%);
+    border: 1px solid rgba(5, 13, 24, 0.08);
+}
+
+.portfolio-thumb-placeholder span {
+    font-family: var(--heading-font, "Raleway", sans-serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.portfolio-thumb-placeholder small {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent-color, #149ddd);
+}
+
+/* Fallback avatar testimoni */
+.testimonial-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: var(--accent-color, #149ddd);
+    color: #fff;
+    font-family: var(--heading-font, "Raleway", sans-serif);
+    font-size: 30px;
+    font-weight: 700;
+}
+
+/* Pesan form kontak (server-side) */
+.php-email-form .error-message:not(:empty),
+.php-email-form .sent-message:not(:empty) {
+    display: block;
+}
+
+.php-email-form .error-message ul {
+    list-style: disc;
+}
+
+/* Select mengikuti gaya input referensi */
+.php-email-form select.form-select {
+    display: block;
+    width: 100%;
+    font-size: 14px;
+    padding: 10px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 0;
+    background-color: #fff;
+    color: #272829;
+    transition: 0.3s;
+}
+
+.php-email-form select.form-select:focus {
+    border-color: var(--accent-color, #149ddd);
+    outline: 0;
+    box-shadow: none;
+}
+
+.php-email-form button[type="submit"]:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Ikon SVG pada kartu layanan */
+.services .service-item .icon svg {
+    width: 24px;
+    height: 24px;
+    color: #fff;
+    stroke: #fff;
+}

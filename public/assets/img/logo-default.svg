@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Logo Heri Agus Prasetyo">
+  <defs>
+    <linearGradient id="ha-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#1e40af"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="108" height="108" rx="26" fill="url(#ha-bg)"/>
+  <rect x="6" y="6" width="108" height="108" rx="26" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="2"/>
+  <text x="60" y="78" font-family="Poppins, Raleway, Arial, sans-serif" font-size="44" font-weight="700" fill="#ffffff" text-anchor="middle" letter-spacing="1">HA</text>
+</svg>

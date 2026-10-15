@@ -1,0 +1,65 @@
+@import "summernote/dist/summernote-lite.css";
+
+/* Catatan: JANGAN set min-height di sini. Opsi `height` summernote mengatur
+   tinggi .note-editable lewat inline style; min-height akan menimpanya
+   sehingga editor :height 140/160/180 ikut memanjang jadi >=200px. */
+/* Dropdown toolbar, popover, dan dialog summernote dirender DI DALAM
+   .note-editor (container default = layoutInfo.editor). overflow: hidden
+   di sini memotong semuanya sehingga menu toolbar dan dialog tampak mati.
+   Radius sudut disebar ke elemen dalam sebagai gantinya. */
+.note-editor.note-frame { border-radius: 12px !important; overflow: visible !important; width: 100% !important; max-width: 100% !important; min-width: 0 !important; }
+.note-toolbar { border-radius: 12px 12px 0 0 !important; display: flex !important; flex-wrap: wrap !important; gap: 4px 0; max-width: 100%; overflow: visible; }
+.note-toolbar > .note-btn-group { margin-right: 4px !important; }
+.note-toolbar > .note-btn-group:last-child { margin-right: 0 !important; }
+/* Dropdown menu toolbar diposisikan absolute terhadap .note-btn-group dan
+   tidak boleh dipotong oleh toolbar yang wrap. */
+.note-btn-group { overflow: visible !important; }
+.note-dropdown-menu { z-index: 1055; }
+.note-editing-area { overflow: hidden; border-radius: 0 0 12px 12px; min-width: 0; max-width: 100%; }
+/* Statusbar summernote = grip drag yang memanjangkan kolom editor tanpa
+   batas ke bawah (sumber bug "deskripsi melar"). Sembunyikan total lewat
+   CSS murni tanpa perubahan JS; tinggi editor tetap dari opsi height. */
+.note-statusbar { display: none !important; }
+/* Fallback: textarea mentah sebelum/di saat JS gagal init (termasuk class
+   .summernote-failed dari admin.js) tetap tampil sebagai field ber-border
+   setara .admin-input, bukan kotak putih polos. Summernote menyembunyikan
+   textarea ini (display:none) setelah init berhasil. */
+textarea.summernote {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 260px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #111827;
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    outline: none;
+    resize: vertical;
+}
+.note-editable {
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif !important;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.note-editable img,
+.note-editable table,
+.note-editable iframe,
+.note-editable video,
+.note-editable pre {
+    max-width: 100% !important;
+}
+.note-editable table {
+    table-layout: fixed;
+    width: 100% !important;
+}
+.note-dropdown-menu,
+.note-modal {
+    max-width: 100%;
+}

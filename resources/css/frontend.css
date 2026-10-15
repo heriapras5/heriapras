@@ -1,0 +1,473 @@
+@import "tailwindcss";
+@import "devicon/devicon.min.css";
+
+@theme {
+    --color-abyss: #08081a;
+    --color-night: #0c0c22;
+    --color-card: #141432;
+    --color-card-border: #26264d;
+    --color-primary: #7c3aed;
+    --color-primary-dark: #6d28d9;
+    --color-primary-soft: #2a2158;
+    --color-glow: #8b5cf6;
+    --color-sunshine: #ffc400;
+    --color-heading: #f4f4fb;
+    --color-body: #b9b9d6;
+    --color-muted: #a7a7cf;
+
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+body {
+    background-color: var(--color-abyss);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Teks typed di hero: lebar di-reserve oleh JS (min-width = kata terpanjang)
+   agar mengetik/menghapus tidak memicu reflow ke elemen lain */
+.typed-roles {
+    display: inline-block;
+    text-align: left;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Skip link aksesibilitas */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 1rem;
+    z-index: 100;
+    background: var(--color-primary);
+    color: #fff;
+    padding: 0.6rem 1.2rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+    top: 1rem;
+}
+
+:focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Tombol */
+.btn-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 10px;
+    padding: 0.7rem 1.5rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    line-height: 1.2;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn-pill:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background-image: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(124, 58, 237, 0.4);
+}
+
+.btn-primary:hover {
+    background-image: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: var(--color-heading);
+    border-color: var(--color-card-border);
+}
+
+.btn-outline:hover {
+    border-color: var(--color-primary);
+    background-color: rgba(124, 58, 237, 0.12);
+}
+
+.btn-white {
+    background-color: transparent;
+    color: var(--color-heading);
+    border-color: var(--color-card-border);
+}
+
+.btn-white:hover {
+    border-color: var(--color-primary);
+}
+
+/* Tipografi section ala referensi */
+.eyebrow {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-glow);
+}
+
+.eyebrow-pill {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-glow);
+    background: rgba(124, 58, 237, 0.12);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+}
+
+.section-title {
+    color: var(--color-heading);
+    font-weight: 800;
+    font-size: clamp(1.4rem, 2.4vw, 1.75rem);
+    line-height: 1.25;
+}
+
+/* Tile ikon statistik ala mockup (gradasi ungu, ikon putih) */
+.stat-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background-image: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35);
+    flex-shrink: 0;
+}
+
+/* Kartu dark */
+.card-soft {
+    background: var(--color-card);
+    border: 1px solid var(--color-card-border);
+    border-radius: 16px;
+}
+
+.card-hover {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-4px);
+    border-color: var(--color-primary);
+    box-shadow: 0 16px 40px rgba(124, 58, 237, 0.18);
+}
+
+/* Scroll top */
+.scroll-top {
+    position: fixed;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 60;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 999px;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.scroll-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.scroll-top:hover {
+    transform: translateY(-2px);
+    background: var(--color-primary-dark);
+}
+
+/* Navbar dark */
+.nav-link {
+    position: relative;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--color-body);
+    padding: 0.35rem 0.1rem;
+    transition: color 0.15s ease;
+}
+
+.nav-link:hover {
+    color: #fff;
+}
+
+.nav-link.active {
+    color: #fff;
+    font-weight: 700;
+}
+
+.nav-link.active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 2px;
+    border-radius: 999px;
+    background: var(--color-primary);
+}
+
+#navbar {
+    transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+#navbar.scrolled {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+}
+
+/* Form dark */
+.form-pill {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--color-card-border);
+    background: #0e0e28;
+    padding: 0.7rem 1.1rem;
+    font-size: 0.88rem;
+    color: var(--color-heading);
+}
+
+.form-pill::placeholder {
+    color: var(--color-muted);
+}
+
+.form-pill:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
+}
+
+.form-error {
+    color: #f87171;
+    font-size: 0.78rem;
+    margin-top: 0.3rem;
+}
+
+/* Skill progress bar */
+.skill-track {
+    height: 8px;
+    border-radius: 999px;
+    background: #23234d;
+    overflow: hidden;
+}
+
+.skill-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #7c3aed, #8b5cf6);
+    width: 0;
+    transition: width 1.1s ease;
+}
+
+/* Reveal on scroll (hanya saat JS aktif, ditandai kelas .js pada <html>) */
+html.js .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+html.js .reveal.revealed {
+    opacity: 1;
+    transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.js .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+}
+
+/* Rich copy */
+.rich-copy p {
+    margin-bottom: 0.9rem;
+    line-height: 1.7;
+}
+
+.rich-copy ul,
+.rich-copy ol {
+    margin: 0 0 0.9rem 1.25rem;
+    line-height: 1.7;
+}
+
+.rich-copy ul {
+    list-style: disc;
+}
+
+.rich-copy ol {
+    list-style: decimal;
+}
+
+.rich-copy a {
+    color: var(--color-glow);
+    text-decoration: underline;
+}
+
+.legal-copy p {
+    margin-bottom: 1rem;
+    line-height: 1.75;
+}
+
+.legal-copy h2 {
+    color: var(--color-heading);
+    font-weight: 800;
+    font-size: 1.2rem;
+    margin: 1.6rem 0 0.6rem;
+}
+
+.legal-copy h2:first-child {
+    margin-top: 0;
+}
+
+.legal-copy h3 {
+    color: var(--color-heading);
+    font-weight: 800;
+    font-size: 1.05rem;
+    margin: 1.6rem 0 0.6rem;
+}
+
+.legal-copy ul {
+    list-style: disc;
+    margin: 0 0 1rem 1.25rem;
+    line-height: 1.75;
+}
+
+/* Dots pattern hero */
+.dots-grid {
+    background-image: radial-gradient(rgba(139, 92, 246, 0.55) 1.5px, transparent 1.5px);
+    background-size: 14px 14px;
+}
+
+/* Carousel portfolio: satu baris, geser horizontal */
+.carousel-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.portfolio-track {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    gap: 1.25rem;
+    overflow-x: auto;
+    /* Marquee kontinu (JS rAF) menulis scrollLeft tiap frame;
+       scroll-behavior smooth akan di-accumulate browser → macet.
+       Smoothness nudge tombol tetap dari scrollBy JS. */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0.25rem;
+}
+
+.portfolio-track::-webkit-scrollbar {
+    display: none;
+}
+
+.portfolio-card {
+    flex: 0 0 85%;
+}
+
+@media (min-width: 640px) {
+    .portfolio-card {
+        flex-basis: calc(50% - 0.625rem);
+    }
+}
+
+@media (min-width: 1024px) {
+    .portfolio-card {
+        flex-basis: calc(33.333% - 0.875rem);
+    }
+}
+
+/* Tombol prev/next di sisi kiri-kanan baris (dalam alur layout, tidak menutupi card) */
+.carousel-btn {
+    flex: 0 0 auto;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20, 20, 50, 0.9);
+    border: 1px solid var(--color-card-border);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    transition: border-color 0.15s ease, background-color 0.15s ease, opacity 0.2s ease;
+}
+
+.carousel-btn:hover {
+    border-color: var(--color-primary);
+    background: rgba(124, 58, 237, 0.25);
+}
+
+.carousel-btn[hidden] {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .carousel-btn {
+        width: 2.25rem;
+        height: 2.25rem;
+    }
+
+    .carousel-row {
+        gap: 0.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .portfolio-track {
+        scroll-behavior: auto;
+    }
+}
+
+/* Hover card di dalam track dinonaktifkan:
+   transform/box-shadow di tengah marquee memicu jank */
+.portfolio-track .card-hover:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--color-card-border);
+}
