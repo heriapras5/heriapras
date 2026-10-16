@@ -45,9 +45,11 @@ class ProjectRepository extends BaseRepository implements ProjectRepositoryInter
     {
         return $this->model
             ->with(['images', 'categories'])
-            ->where('id', '!=', $projectId)
-            ->whereHas('categories', fn($q) => $q->where('id', $categoryId))
-            ->where('status', true)
+            ->where('projects.id', '!=', $projectId)
+            ->whereHas('categories', fn($q) => $q->where('project_categories.id', $categoryId))
+            ->where('projects.status', true)
+            ->orderBy('projects.created_at', 'desc')
+            ->orderBy('projects.id', 'desc')
             ->limit($limit)
             ->get();
     }

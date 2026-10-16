@@ -28,6 +28,16 @@ class FrontendService
         return $this->projectRepo->findBySlug($slug);
     }
 
+    public function getRelatedProjects($project, int $limit = 3): Collection
+    {
+        $category = $project->categories->first();
+        if (! $category) {
+            return new Collection();
+        }
+
+        return $this->projectRepo->getRelated($project->id, $category->id, $limit);
+    }
+
     public function getPrevProject(int $currentId): ?Model
     {
         return $this->projectRepo->getPrevProject($currentId);

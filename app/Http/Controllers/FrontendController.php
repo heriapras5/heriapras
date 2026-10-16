@@ -47,10 +47,9 @@ class FrontendController extends Controller
         if (! $project) {
             abort(404);
         }
-        $prevProject = $this->frontendService->getPrevProject($project->id);
-        $nextProject = $this->frontendService->getNextProject($project->id);
+        $relatedProjects = $this->frontendService->getRelatedProjects($project, 3);
 
-        return view('frontend.detail-project', compact('project', 'prevProject', 'nextProject'));
+        return view('frontend.detail-project', compact('project', 'relatedProjects'));
     }
 
     public function favicon()

@@ -130,23 +130,16 @@
 </section>
 @endif
 
-@if($prevProject || $nextProject)
+@if($relatedProjects->count())
 <section class="bg-abyss border-t border-white/5">
-    <div class="max-w-6xl mx-auto px-5 py-10 grid gap-4 sm:grid-cols-2">
-        @if($prevProject)
-            <a href="{{ route('projects.detail', $prevProject->slug) }}" class="card-soft card-hover p-5">
-                <small class="text-xs font-bold text-muted uppercase tracking-wider">Projek sebelumnya</small>
-                <strong class="block text-white mt-1">{{ $prevProject->name }}</strong>
-            </a>
-        @else
-            <span></span>
-        @endif
-        @if($nextProject)
-            <a href="{{ route('projects.detail', $nextProject->slug) }}" class="card-soft card-hover p-5 sm:text-right">
-                <small class="text-xs font-bold text-muted uppercase tracking-wider">Projek berikutnya</small>
-                <strong class="block text-white mt-1">{{ $nextProject->name }}</strong>
-            </a>
-        @endif
+    <div class="max-w-6xl mx-auto px-5 py-12">
+        <p class="eyebrow">Jelajahi lainnya</p>
+        <h2 class="section-title mt-2">Portofolio Terkait</h2>
+        <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            @foreach($relatedProjects as $related)
+                @include('partials.frontend.project-card', ['project' => $related, 'isClone' => false])
+            @endforeach
+        </div>
     </div>
 </section>
 @endif

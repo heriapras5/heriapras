@@ -87,9 +87,11 @@ class SettingsController extends Controller
             Setting::updateOrCreate(['key' => 'profile_photo'], ['value' => '', 'group' => 'general', 'type' => 'text']);
         } elseif ($request->hasFile('profile_photo')) {
             deleteFile(Setting::where('key', 'profile_photo')->value('value'));
-            $ext = $request->file('profile_photo')->extension() ?: 'jpg';
-            $path = $request->file('profile_photo')->storeAs('settings', 'heri-profile.'.$ext, 'public');
-            Setting::updateOrCreate(['key' => 'profile_photo'], ['value' => 'storage/'.$path, 'group' => 'general', 'type' => 'text']);
+            // Nama file diseragamkan menjadi heri-profile.* agar URL foto hero
+            // stabil; cache-buster (?v=filemtime) dipasang di view hero.
+            // JPEG/PNG otomatis dikonversi ke heri-profile.webp (hemat storage).
+            $stored = storeImageAsWebp($request->file('profile_photo'), 'settings', 'heri-profile');
+            Setting::updateOrCreate(['key' => 'profile_photo'], ['value' => $stored, 'group' => 'general', 'type' => 'text']);
         }
 
         if ($request->boolean('remove_logo_image')) {
@@ -97,8 +99,8 @@ class SettingsController extends Controller
             Setting::updateOrCreate(['key' => 'logo_image'], ['value' => '', 'group' => 'general', 'type' => 'text']);
         } elseif ($request->hasFile('logo_image')) {
             deleteFile(Setting::where('key', 'logo_image')->value('value'));
-            $path = $request->file('logo_image')->store('settings', 'public');
-            Setting::updateOrCreate(['key' => 'logo_image'], ['value' => 'storage/'.$path, 'group' => 'general', 'type' => 'text']);
+            $stored = storeImageAsWebp($request->file('logo_image'), 'settings');
+            Setting::updateOrCreate(['key' => 'logo_image'], ['value' => $stored, 'group' => 'general', 'type' => 'text']);
         }
 
         if ($request->boolean('remove_favicon')) {
@@ -106,8 +108,17 @@ class SettingsController extends Controller
             Setting::updateOrCreate(['key' => 'favicon'], ['value' => '', 'group' => 'general', 'type' => 'text']);
         } elseif ($request->hasFile('favicon')) {
             deleteFile(Setting::where('key', 'favicon')->value('value'));
-            $path = $request->file('favicon')->store('settings', 'public');
-            Setting::updateOrCreate(['key' => 'favicon'], ['value' => 'storage/'.$path, 'group' => 'general', 'type' => 'text']);
+            $faviconFile = $request->file('favicon');
+            $faviconMime = (string) $faviconFile->getMimeType();
+            if (in_array($faviconMime, ['image/x-icon', 'image/vnd.microsoft.icon'], true)
+                || strtolower($faviconFile->getClientOriginalExtension()) === 'ico') {
+                // .ico tidak bisa dibaca GD: simpan apa adanya.
+                $path = $faviconFile->store('settings', 'public');
+                $stored = 'storage/'.$path;
+            } else {
+                $stored = storeImageAsWebp($faviconFile, 'settings');
+            }
+            Setting::updateOrCreate(['key' => 'favicon'], ['value' => $stored, 'group' => 'general', 'type' => 'text']);
         }
 
         if ($request->boolean('remove_seo_og_image')) {
@@ -115,9 +126,8 @@ class SettingsController extends Controller
             Setting::updateOrCreate(['key' => 'seo_og_image'], ['value' => '', 'group' => 'seo', 'type' => 'text']);
         } elseif ($request->hasFile('seo_og_image')) {
             deleteFile(Setting::where('key', 'seo_og_image')->value('value'));
-            $path = $request->file('seo_og_image')->store('settings', 'public');
-            optimizeImage('storage/' . $path);
-            Setting::updateOrCreate(['key' => 'seo_og_image'], ['value' => 'storage/' . $path, 'group' => 'seo', 'type' => 'text']);
+            $stored = storeImageAsWebp($request->file('seo_og_image'), 'settings');
+            Setting::updateOrCreate(['key' => 'seo_og_image'], ['value' => $stored, 'group' => 'seo', 'type' => 'text']);
         }
 
         forgetSettingsCache();

@@ -1,7 +1,9 @@
 <?php
 
 use App\Models\Setting;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('setting')) {
     function setting(string $key, mixed $default = null): mixed
@@ -304,6 +306,134 @@ if (! function_exists('isEmptyRichText')) {
 
         // Tanpa teks, tapi konten visual (gambar/embed/tabel/hr) tetap dianggap terisi.
         return ! preg_match('/<(img|iframe|video|table|hr)\b/i', $html);
+    }
+}
+
+if (! function_exists('convertImageBytesToWebp')) {
+    /**
+     * Encode resource GD menjadi bytes WebP.
+     * Return null bila GD tidak mendukung WebP atau encode gagal.
+     */
+    function convertImageBytesToWebp(\GdImage $image, int $quality = 80): ?string
+    {
+        if (! function_exists('imagewebp')) {
+            return null;
+        }
+        ob_start();
+        $ok = @imagewebp($image, null, $quality);
+        $bytes = ob_get_clean();
+        if (! $ok || ! $bytes) {
+            return null;
+        }
+
+        return $bytes;
+    }
+}
+
+if (! function_exists('convertStoredImageToWebp')) {
+    /**
+     * Konversi file gambar JPEG/PNG pada disk `public` menjadi WebP di sebelahnya.
+     * Transparansi PNG dipertahankan; gambar diperkecil bila sisi terpanjang
+     * melebihi $maxDim. File .webp/.ico dan non-JPEG/PNG dilewati.
+     *
+     * @return string path disk-relatif file .webp, atau null bila dilewati/gagal.
+     */
+    function convertStoredImageToWebp(string $diskPath, int $quality = 80, int $maxDim = 1600): ?string
+    {
+        $disk = Storage::disk('public');
+        if (! $disk->exists($diskPath)) {
+            return null;
+        }
+        $ext = strtolower(pathinfo($diskPath, PATHINFO_EXTENSION));
+        if (in_array($ext, ['webp', 'ico'], true)) {
+            return null;
+        }
+        $info = @getimagesizefromstring((string) $disk->get($diskPath));
+        if (! in_array($info['mime'] ?? '', ['image/jpeg', 'image/png'], true)) {
+            return null;
+        }
+        $src = @imagecreatefromstring((string) $disk->get($diskPath));
+        if (! $src) {
+            return null;
+        }
+
+        $w = imagesx($src);
+        $h = imagesy($src);
+        $scale = min(1, $maxDim / max(1, max($w, $h)));
+        $nw = max(1, (int) round($w * $scale));
+        $nh = max(1, (int) round($h * $scale));
+        $dst = $src;
+        if ($scale < 1) {
+            $dst = imagecreatetruecolor($nw, $nh);
+            imagealphablending($dst, false);
+            imagesavealpha($dst, true);
+            imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+        }
+
+        $webp = convertImageBytesToWebp($dst, $quality);
+        imagedestroy($src);
+        if ($dst !== $src) {
+            imagedestroy($dst);
+        }
+        if ($webp === null) {
+            return null;
+        }
+
+        $base = substr($diskPath, 0, $ext === '' ? strlen($diskPath) : -strlen($ext));
+        $target = $base.'webp';
+        $i = 1;
+        while ($disk->exists($target) && $i < 100) {
+            $target = $base.$i++.'.webp';
+        }
+        $disk->put($target, $webp);
+
+        return $target;
+    }
+}
+
+if (! function_exists('storeImageAsWebp')) {
+    /**
+     * Simpan file upload gambar; JPEG/PNG otomatis dikonversi ke WebP
+     * agar hemat storage (kualitas default 80). Gagal/tak didukung =
+     * file asli disimpan (tetap dioptimasi via optimizeImage()).
+     *
+     * @return string path 'storage/...' siap simpan ke DB.
+     */
+    function storeImageAsWebp(UploadedFile $file, string $directory, ?string $baseName = null, int $quality = 80): string
+    {
+        $directory = trim($directory, '/');
+        $disk = Storage::disk('public');
+        $tmpPath = $file->store($directory, 'public');
+
+        $webpPath = convertStoredImageToWebp($tmpPath, $quality);
+        if ($webpPath !== null) {
+            $final = $baseName ? $directory.'/'.$baseName.'.webp' : $webpPath;
+            if ($final !== $webpPath) {
+                if ($disk->exists($final)) {
+                    $disk->delete($final); // timpa, sama seperti perilaku storeAs selama ini
+                }
+                $disk->move($webpPath, $final);
+            }
+            $disk->delete($tmpPath);
+
+            return 'storage/'.$final;
+        }
+
+        $path = $tmpPath;
+        if ($baseName) {
+            // Samakan perilaku lama: nama fix + ekstensi asli bila tak terkonversi.
+            $fixed = $directory.'/'.$baseName.'.'.$file->extension();
+            if ($fixed !== $tmpPath) {
+                if ($disk->exists($fixed)) {
+                    $disk->delete($fixed);
+                }
+                $disk->move($tmpPath, $fixed);
+                $path = $fixed;
+            }
+        }
+        optimizeImage('storage/'.$path);
+
+        return 'storage/'.$path;
     }
 }
 

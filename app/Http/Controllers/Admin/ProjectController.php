@@ -76,10 +76,9 @@ class ProjectController extends Controller
         $this->syncTechnologies($project, $data['technologies'] ?? []);
 
         if ($request->hasFile('main_image')) {
-            $path = $request->file('main_image')->store('projects', 'public');
-            optimizeImage('storage/'.$path);
+            $stored = storeImageAsWebp($request->file('main_image'), 'projects');
             $project->images()->create([
-                'image' => 'storage/'.$path,
+                'image' => $stored,
                 'type' => 'cover',
                 'sort_order' => 0,
             ]);
@@ -87,10 +86,9 @@ class ProjectController extends Controller
 
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $i => $file) {
-                $path = $file->store('projects', 'public');
-                optimizeImage('storage/'.$path);
+                $stored = storeImageAsWebp($file, 'projects');
                 $project->images()->create([
-                    'image' => 'storage/'.$path,
+                    'image' => $stored,
                     'type' => 'gallery',
                     'sort_order' => $i + 1,
                 ]);
@@ -171,10 +169,9 @@ class ProjectController extends Controller
                 deleteFile($img->image);
                 $img->delete();
             });
-            $path = $request->file('main_image')->store('projects', 'public');
-            optimizeImage('storage/'.$path);
+            $stored = storeImageAsWebp($request->file('main_image'), 'projects');
             $project->images()->create([
-                'image' => 'storage/'.$path,
+                'image' => $stored,
                 'type' => 'cover',
                 'sort_order' => 0,
             ]);
@@ -191,10 +188,9 @@ class ProjectController extends Controller
                 $maxSort = $project->images()->max('sort_order') ?? 0;
             }
             foreach ($request->file('gallery_images') as $i => $file) {
-                $path = $file->store('projects', 'public');
-                optimizeImage('storage/'.$path);
+                $stored = storeImageAsWebp($file, 'projects');
                 $project->images()->create([
-                    'image' => 'storage/'.$path,
+                    'image' => $stored,
                     'type' => 'gallery',
                     'sort_order' => $maxSort + $i + 1,
                 ]);

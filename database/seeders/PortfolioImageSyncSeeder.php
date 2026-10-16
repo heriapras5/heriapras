@@ -46,19 +46,30 @@ class PortfolioImageSyncSeeder extends Seeder
             }
             $ext = pathinfo($file, PATHINFO_EXTENSION);
             $destName = $slug.'.'.$ext;
-            copy($src, $destDir.'/'.$destName);
-
-            $relative = 'storage/projects-sync/'.$destName;
-            if (function_exists('optimizeImage')) {
-                optimizeImage($relative, 1600, 82);
+            // Bersihkan sisa WebP sync sebelumnya agar tidak menumpuk sufiks -1, -2.
+            foreach (glob($destDir.'/'.$slug.'*.webp') ?: [] as $stale) {
+                @unlink($stale);
             }
-
+            // Hapus SELURUH cover lama slug ini (file + baris DB) SEBELUM menulis
+            // file baru, karena nama file baru bisa sama dengan yang lama.
             $project->images()->where('type', 'cover')->each(function ($img) {
-                if (function_exists('deleteFile') && ! str_contains((string) $img->image, 'projects-sync/')) {
+                if (function_exists('deleteFile')) {
                     deleteFile($img->image);
                 }
                 $img->delete();
             });
+            copy($src, $destDir.'/'.$destName);
+
+            // Hemat storage: konversi hasil salinan ke WebP bila memungkinkan.
+            // Path DB selalu menunjuk file final (webp bila terkonversi).
+            $relative = 'storage/projects-sync/'.$destName;
+            $webpDiskPath = convertStoredImageToWebp('projects-sync/'.$destName);
+            if ($webpDiskPath !== null) {
+                @unlink($destDir.'/'.$destName);
+                $relative = 'storage/'.$webpDiskPath;
+            } elseif (function_exists('optimizeImage')) {
+                optimizeImage($relative, 1600, 82);
+            }
 
             $project->images()->create([
                 'image' => $relative,

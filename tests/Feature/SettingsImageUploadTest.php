@@ -54,4 +54,58 @@ class SettingsImageUploadTest extends TestCase
         $stored = \App\Models\Setting::where('key', 'logo_image')->value('value');
         $this->assertNotEmpty($stored, 'logo_image setting must be saved');
     }
+
+    public function test_jpg_upload_is_converted_to_webp(): void
+    {
+        if (! function_exists('imagewebp')) {
+            $this->markTestSkipped('GD WebP tidak tersedia.');
+        }
+        $this->admin();
+        Storage::fake('public');
+
+        $file = UploadedFile::fake()->image('foto.jpg', 1200, 800);
+
+        $response = $this->put(route('admin.settings.update'), [
+            'profile_photo' => $file,
+        ]);
+
+        $response->assertRedirect(route('admin.settings.index'));
+
+        $stored = (string) \App\Models\Setting::where('key', 'profile_photo')->value('value');
+        $this->assertStringEndsWith('.webp', $stored, 'JPEG upload must be converted to WebP');
+        $rel = (string) preg_replace('#^storage/#', '', $stored);
+        Storage::disk('public')->assertExists($rel);
+        $info = @getimagesizefromstring((string) Storage::disk('public')->get($rel));
+        $this->assertSame('image/webp', $info['mime'] ?? null);
+    }
+
+    public function test_png_upload_is_converted_to_webp(): void
+    {
+        if (! function_exists('imagewebp')) {
+            $this->markTestSkipped('GD WebP tidak tersedia.');
+        }
+        $this->admin();
+        Storage::fake('public');
+
+        $gd = imagecreatetruecolor(600, 400);
+        imagefill($gd, 0, 0, imagecolorallocate($gd, 30, 90, 200));
+        $tmp = tempnam(sys_get_temp_dir(), 'pngtest').'.png';
+        imagepng($gd, $tmp);
+        imagedestroy($gd);
+        $file = new UploadedFile($tmp, 'foto.png', 'image/png', null, true);
+
+        $response = $this->put(route('admin.settings.update'), [
+            'profile_photo' => $file,
+        ]);
+
+        $response->assertRedirect(route('admin.settings.index'));
+
+        $stored = (string) \App\Models\Setting::where('key', 'profile_photo')->value('value');
+        $this->assertStringEndsWith('.webp', $stored, 'PNG upload must be converted to WebP');
+        $this->assertStringContainsString('heri-profile', $stored, 'fixed profile filename must be kept');
+        $rel = (string) preg_replace('#^storage/#', '', $stored);
+        Storage::disk('public')->assertExists($rel);
+        $info = @getimagesizefromstring((string) Storage::disk('public')->get($rel));
+        $this->assertSame('image/webp', $info['mime'] ?? null);
+    }
 }
