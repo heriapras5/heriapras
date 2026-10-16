@@ -108,7 +108,7 @@
                     @endforeach
                 </div>
             @endif
-            <a href="{{ route('home') }}#portfolio" class="btn-pill btn-outline w-full mt-6">Kembali ke Portofolio</a>
+            <a href="{{ route('portfolio.index') }}" class="btn-pill btn-outline w-full mt-6">Kembali ke Portofolio</a>
         </aside>
     </div>
 </section>
