@@ -7,7 +7,7 @@
 @include('partials.frontend.page-title', ['title' => setting('landing_portfolio_title') ?: 'Portfolio', 'breadcrumb' => 'Portfolio'])
 
 <section class="bg-abyss">
-    <div class="max-w-6xl mx-auto px-5 py-12 md:py-16">
+    <div class="max-w-6xl mx-auto px-5 pt-8 pb-12 md:pt-10 md:pb-16">
         <p class="text-center text-[15px] text-muted max-w-xl mx-auto">{{ setting('landing_portfolio_subtitle') ?: 'Berikut adalah beberapa proyek website dan aplikasi yang telah saya bangun.' }}</p>
         @if($categories->count())
         <div class="mt-6 flex flex-nowrap justify-start md:justify-center gap-2 overflow-x-auto tabs-scroll max-w-full px-1 py-1" aria-label="Filter kategori portfolio">

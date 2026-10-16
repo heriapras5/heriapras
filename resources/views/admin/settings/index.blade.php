@@ -118,7 +118,7 @@
 
         <x-admin.form-card title="Judul Tab Browser" description="Teks pada tab browser tiap halaman. Kosongkan untuk memakai otomatis. Pola mendukung {project}, {site}, dan {nama}.">
             <div class="space-y-4">
-                <x-admin.input name="tab_home" label="Tab: Homepage" :value="$settings['tab_home'] ?? ''" placeholder="Heri A Pras - Web Developer & Software Engineer" />
+                <x-admin.input name="tab_home" label="Tab: Homepage" :value="$settings['tab_home'] ?? ''" placeholder="Heri A Pras - Web Developer & Software Engineer" help="Terpisah dari Nama Lengkap pada Profil — mengubah nama profil tidak mengubah judul tab." />
                 <x-admin.input name="tab_portfolio" label="Tab: Semua Portfolio" :value="$settings['tab_portfolio'] ?? ''" placeholder="Portfolio - Heri A Pras" />
                 <x-admin.input name="tab_project" label="Tab: Detail Portfolio (pola)" :value="$settings['tab_project'] ?? ''" placeholder="{project} - Heri A Pras" help="Contoh hasil: Website DUYUFUNA - Heri A Pras." />
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

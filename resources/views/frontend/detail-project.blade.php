@@ -21,7 +21,7 @@
 @include('partials.frontend.page-title', ['title' => $project->name, 'breadcrumb' => $project->name])
 
 <section class="bg-abyss">
-    <div class="max-w-6xl mx-auto px-5 py-12 md:py-16 grid gap-6 lg:grid-cols-[1.6fr_1fr] items-start">
+    <div class="max-w-6xl mx-auto px-5 pt-8 pb-12 md:pt-10 md:pb-16 grid gap-6 lg:grid-cols-[1.6fr_1fr] items-start">
         <div class="reveal card-soft overflow-hidden">
             @if($slides->count())
             <div id="project-gallery" class="project-gallery" data-slide-count="{{ $slides->count() }}">
@@ -116,7 +116,6 @@
 @if($project->features->count())
 <section class="bg-night border-t border-white/5">
     <div class="max-w-6xl mx-auto px-5 py-12">
-        <p class="eyebrow">Fitur Unggulan</p>
         <h2 class="section-title mt-2">Yang dikerjakan dalam project ini</h2>
         <ul class="mt-6 grid gap-4 md:grid-cols-2">
             @foreach($project->features as $feature)

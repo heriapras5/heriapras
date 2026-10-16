@@ -377,6 +377,21 @@
                 galleryGoTo(galleryIndex + (dx < 0 ? 1 : -1));
             }, { passive: true });
         }
+        /* Geser popup dengan jari (mobile): pola sama seperti slider,
+           dipasang pada overlay lightbox yang sedang terbuka. */
+        var lightboxTouchX = null;
+        if (lightbox) {
+            lightbox.addEventListener('touchstart', function (e) {
+                lightboxTouchX = e.touches[0].clientX;
+            }, { passive: true });
+            lightbox.addEventListener('touchend', function (e) {
+                if (lightbox.hidden || lightboxTouchX === null) return;
+                var dx = e.changedTouches[0].clientX - lightboxTouchX;
+                lightboxTouchX = null;
+                if (Math.abs(dx) < 40) return;
+                galleryGoTo(galleryIndex + (dx < 0 ? 1 : -1));
+            }, { passive: true });
+        }
         galleryGoTo(0);
     }
 

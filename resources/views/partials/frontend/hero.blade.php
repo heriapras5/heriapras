@@ -15,7 +15,7 @@
             <h1 class="text-white font-extrabold leading-[1.12] text-4xl md:text-5xl">
                 <span class="text-glow">{{ $fullName }}</span>
             </h1>
-            <p class="mt-4 text-base leading-relaxed max-w-md">{{ $bio }}</p>
+            <p class="mt-4 text-sm md:text-[15px] leading-relaxed max-w-md text-justify hyphens-auto">{{ $bio }}</p>
 <p class="mt-2 text-[15px] text-muted">
     <span class="typed-roles font-semibold text-glow" data-typed-items="{{ $typedRoles }}">{{ $role }}</span>
 </p>
