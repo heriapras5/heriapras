@@ -550,6 +550,8 @@ html.js .reveal.revealed {
     justify-content: center;
     background: rgba(4, 4, 12, 0.92);
     padding: 1rem;
+    /* Geser horizontal ditangani JS; biarkan browser menangani pan vertikal. */
+    touch-action: pan-y;
 }
 
 .project-lightbox[hidden] {
@@ -563,6 +565,7 @@ html.js .reveal.revealed {
     border: 1px solid var(--color-card-border);
     object-fit: contain;
     background: #0c0c22;
+    touch-action: pan-y;
 }
 
 .project-lightbox .project-gallery-nav {

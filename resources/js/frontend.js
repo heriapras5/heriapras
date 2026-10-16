@@ -382,10 +382,12 @@
         var lightboxTouchX = null;
         if (lightbox) {
             lightbox.addEventListener('touchstart', function (e) {
+                if (!e.touches || !e.touches.length) return;
                 lightboxTouchX = e.touches[0].clientX;
             }, { passive: true });
             lightbox.addEventListener('touchend', function (e) {
                 if (lightbox.hidden || lightboxTouchX === null) return;
+                if (!e.changedTouches || !e.changedTouches.length) return;
                 var dx = e.changedTouches[0].clientX - lightboxTouchX;
                 lightboxTouchX = null;
                 if (Math.abs(dx) < 40) return;

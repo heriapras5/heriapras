@@ -67,7 +67,7 @@
                 </div>
             @endif
             <div class="p-6 border-t border-white/5">
-                <h2 class="font-extrabold text-white text-lg">Deskripsi Projek</h2>
+                <h2 class="font-extrabold text-white text-lg">Deskripsi</h2>
                 <div class="rich-copy mt-3 text-[15px] text-justify">
                     @if($project->description)
                         {!! cleanRichText($project->description) !!}
