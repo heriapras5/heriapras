@@ -1,2 +1,6 @@
 *
 !.gitignore
+!projects-sync/
+!projects-sync/*
+!settings/
+!settings/*
