@@ -14,7 +14,9 @@
         $siteDescription = setting('site_description', 'Portfolio pribadi Heri Agus Prasetyo.');
         $ogTitle = trim(strip_tags((string) View::yieldContent('title', $siteName . ' - ' . setting('role', 'Web Developer & Software Engineer'))));
         $ogDescription = trim(strip_tags((string) View::yieldContent('meta_description', $siteDescription)));
-        $ogImage = url('/og-image.png') . '?v=' . md5((string) (setting('profile_photo') ?: $siteName));
+        // Sufiks '|og-dark-v1': pengganjal versi agar platform share mengambil
+        // ulang gambar setelah latar diganti hitam (URL berubah = cache baru).
+        $ogImage = url('/og-image.png') . '?v=' . md5((string) (setting('profile_photo') ?: $siteName) . '|og-dark-v1');
     @endphp
     <meta property="og:title" content="{{ $ogTitle }}">
     <meta property="og:description" content="{{ $ogDescription }}">

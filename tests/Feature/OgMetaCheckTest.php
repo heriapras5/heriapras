@@ -38,6 +38,19 @@ class OgMetaCheckTest extends TestCase
 
         $this->assertSame(1200, $info[0], 'og:image width must match declared 1200');
         $this->assertSame(630, $info[1], 'og:image height must match declared 630');
+
+        $gd = @imagecreatefromstring($response->getContent());
+        $this->assertNotFalse($gd, 'og:image must be decodable for pixel check');
+        $corner = imagecolorat($gd, 0, 0);
+        $r = ($corner >> 16) & 0xFF;
+        $g = ($corner >> 8) & 0xFF;
+        $b = $corner & 0xFF;
+        imagedestroy($gd);
+        $this->assertLessThanOrEqual(
+            12,
+            max($r, $g, $b),
+            'og:image background corner must stay near-black'
+        );
     }
 
     public function test_json_ld_is_valid_person_schema(): void

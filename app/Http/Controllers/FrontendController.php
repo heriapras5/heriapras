@@ -139,8 +139,11 @@ class FrontendController extends Controller
         $logo = setting('seo_og_image') ?: setting('logo_image') ?: setting('profile_photo');
 
         $img = imagecreatetruecolor($width, $height);
+        // Latar hitam pekat agar pratinjau share (WhatsApp/Telegram/FB) gelap.
+        // $white tetap dipakai bentuk fallback saat tanpa foto.
+        $black = imagecolorallocate($img, 0, 0, 0);
         $white = imagecolorallocate($img, 255, 255, 255);
-        imagefill($img, 0, 0, $white);
+        imagefill($img, 0, 0, $black);
 
         $source = null;
         if ($logo) {
@@ -167,7 +170,7 @@ class FrontendController extends Controller
             for ($y = 0; $y < $diameter; $y++) {
                 for ($x = 0; $x < $diameter; $x++) {
                     if ((($x - $c) * ($x - $c)) + (($y - $c) * ($y - $c)) > ($r * $r)) {
-                        imagesetpixel($square, $x, $y, $white);
+                        imagesetpixel($square, $x, $y, $black);
                     }
                 }
             }
