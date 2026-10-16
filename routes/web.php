@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ProjectCategoryController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\SeoController;
+use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\StatusController;
 use App\Http\Controllers\Admin\TimelineItemController;
@@ -65,6 +66,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('banners', BannerController::class);
     Route::resource('about-sections', AboutSectionController::class);
     Route::resource('timeline', TimelineItemController::class)->except(['show']);
+    Route::resource('services', ServiceController::class)->except(['show']);
     Route::resource('project-categories', ProjectCategoryController::class);
     Route::delete('projects/{project}/images/{image}', [ProjectController::class, 'destroyImage'])->name('projects.images.destroy');
     Route::resource('projects', ProjectController::class);
