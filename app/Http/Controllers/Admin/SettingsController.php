@@ -23,6 +23,7 @@ class SettingsController extends Controller
         'ui_hero_tech_label', 'ui_label_view_project',
         'seo_title', 'seo_description',
         'seo_og_image', 'seo_google_analytics',
+        'tab_home', 'tab_portfolio', 'tab_project', 'tab_cv', 'tab_cv_en',
     ];
 
     public function index()
@@ -59,6 +60,11 @@ class SettingsController extends Controller
             'seo_description' => 'nullable|string|max:500',
             'seo_og_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'seo_google_analytics' => 'nullable|string|max:500',
+            'tab_home' => 'nullable|string|max:255',
+            'tab_portfolio' => 'nullable|string|max:255',
+            'tab_project' => 'nullable|string|max:255',
+            'tab_cv' => 'nullable|string|max:255',
+            'tab_cv_en' => 'nullable|string|max:255',
             'remove_profile_photo' => 'nullable|boolean',
             'remove_logo_image' => 'nullable|boolean',
             'remove_favicon' => 'nullable|boolean',
@@ -75,7 +81,8 @@ class SettingsController extends Controller
             'hero_typed_roles',
             'landing_portfolio_title', 'landing_portfolio_subtitle',
             'ui_hero_tech_label', 'ui_label_view_project',
-            'seo_title', 'seo_description', 'seo_google_analytics'] as $key) {
+            'seo_title', 'seo_description', 'seo_google_analytics',
+            'tab_home', 'tab_portfolio', 'tab_project', 'tab_cv', 'tab_cv_en'] as $key) {
             Setting::updateOrCreate(
                 ['key' => $key],
                 ['value' => $data[$key] ?? '', 'group' => 'general', 'type' => 'text']

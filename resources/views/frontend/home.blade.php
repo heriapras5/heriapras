@@ -1,5 +1,6 @@
 @extends('layouts.frontend')
 
+@section('title', setting('tab_home') ?: setting('seo_title') ?: 'Heri A Pras - Web Developer & Software Engineer')
 @section('body_class', 'index-page')
 
 @section('content')

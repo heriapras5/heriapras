@@ -28,6 +28,11 @@ class SettingsSeeder extends Seeder
             'hero_typed_roles' => ['value' => 'Web Developer, Software Engineer', 'group' => 'landing', 'type' => 'text'],
             'landing_portfolio_title' => ['value' => 'Portfolio', 'group' => 'landing', 'type' => 'text'],
             'landing_portfolio_subtitle' => ['value' => 'Berikut adalah beberapa proyek website dan aplikasi yang telah saya bangun.', 'group' => 'landing', 'type' => 'text'],
+            'tab_home' => ['value' => 'Heri A Pras - Web Developer & Software Engineer', 'group' => 'general', 'type' => 'text'],
+            'tab_portfolio' => ['value' => 'Portfolio - Heri A Pras', 'group' => 'general', 'type' => 'text'],
+            'tab_project' => ['value' => '{project} - Heri A Pras', 'group' => 'general', 'type' => 'text'],
+            'tab_cv' => ['value' => 'CV - Heri A Pras', 'group' => 'general', 'type' => 'text'],
+            'tab_cv_en' => ['value' => 'Resume - Heri A Pras', 'group' => 'general', 'type' => 'text'],
         ];
 
         foreach ($defaults as $key => $data) {

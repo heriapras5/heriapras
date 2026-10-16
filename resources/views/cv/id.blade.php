@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<title>CV - {{ $name }}</title>
+<title>{{ fillTitle(setting('tab_cv') ?: 'CV - Heri A Pras', ['nama' => $name]) }}</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; line-height: 1.5; color: #111827; padding: 28px 32px; }

@@ -1,5 +1,5 @@
 @extends('layouts.frontend')
-@section('title', 'Portfolio - ' . setting('full_name', 'Heri Agus Prasetyo'))
+@section('title', setting('tab_portfolio') ?: 'Portfolio - Heri A Pras')
 @section('meta_description', setting('landing_portfolio_subtitle') ?: 'Kumpulan proyek website dan aplikasi yang telah saya bangun.')
 @section('body_class', 'portfolio-index-page')
 

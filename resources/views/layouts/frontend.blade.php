@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', setting('seo_title') ?: 'Heri Agus Prasetyo - Web Developer & Software Engineer')</title>
+    <title>@yield('title', setting('tab_home') ?: setting('seo_title') ?: 'Heri A Pras - Web Developer & Software Engineer')</title>
     <meta name="description" content="@yield('meta_description', setting('seo_description') ?: setting('site_description', 'Portfolio pribadi Heri Agus Prasetyo, Web Developer dan Software Engineer.'))">
     @if(setting('seo_keywords'))<meta name="keywords" content="{{ setting('seo_keywords') }}">@endif
     @if(setting('seo_author'))<meta name="author" content="{{ setting('seo_author') }}">@endif

@@ -1,5 +1,5 @@
 @extends('layouts.frontend')
-@section('title', $project->name . ' - ' . setting('full_name', 'Heri Agus Prasetyo'))
+@section('title', fillTitle(setting('tab_project') ?: '{project} - Heri A Pras', ['project' => $project->name, 'site' => setting('site_name', 'Heri A Pras'), 'nama' => setting('full_name', 'Heri Agus Prasetyo')]))
 @section('meta_description', \Illuminate\Support\Str::limit(strip_tags($project->description ?: 'Project oleh Heri Agus Prasetyo.'), 155))
 @section('body_class', 'portfolio-details-page')
 

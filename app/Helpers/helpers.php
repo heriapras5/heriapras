@@ -16,6 +16,22 @@ if (! function_exists('setting')) {
     }
 }
 
+if (! function_exists('fillTitle')) {
+    /**
+     * Isi placeholder {nama} pada pola judul tab browser.
+     * Placeholder tak dikenal dibiarkan apa adanya (tidak error).
+     */
+    function fillTitle(?string $pattern, array $vars = []): string
+    {
+        $pairs = [];
+        foreach ($vars as $name => $value) {
+            $pairs['{'.$name.'}'] = (string) $value;
+        }
+
+        return strtr((string) $pattern, $pairs);
+    }
+}
+
 if (! function_exists('faviconVersion')) {
     /**
      * Versi cache-buster favicon: berubah setiap favicon/logo/foto profil diganti,
