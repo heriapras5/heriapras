@@ -470,12 +470,16 @@ html.js .reveal.revealed {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(8, 8, 26, 0.65);
-    border: 1px solid var(--color-card-border);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.28);
     color: #fff;
     cursor: pointer;
-    backdrop-filter: blur(4px);
     transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+/* Bayangan agar panah putih tetap terbaca di atas gambar terang tanpa bulatan latar. */
+.project-gallery-nav svg {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.75));
 }
 
 .project-gallery-nav:hover {
