@@ -306,38 +306,356 @@
         var galleryCount = gallerySlides.length;
         var galleryIndex = 0;
 
+        /* Durasi & ambang — diselaraskan dengan frontend.css */
+        var LB_CLOSE_MS = 300;      /* > transition terpanjang saat tutup (0.26s) */
+        var LB_OUT_MS = 165;        /* < durasi fade-out gambar (0.18s) */
+        var LB_LOAD_MS = 900;       /* pengaman bila onload tidak pernah datang */
+        var LB_SHIFT_PX = 22;       /* offset arah masuk/keluar gambar popup */
+        var DRAG_LOCK_PX = 6;       /* px sebelum arah gestur diputuskan */
+        var DRAG_CLICK_PX = 6;      /* px minimum yang membatalkan klik palsu */
+        var DRAG_RUBBER = 0.35;     /* tahanan rubber-band di slide ujung */
+        var DRAG_VELOCITY = 0.5;    /* px/ms: flick tetap pindah walau jarak kecil */
+        var DRAG_DIST_RATIO = 0.15; /* ambang jarak = 15% lebar (clamp 42-96px) */
+        var CLICK_GUARD_MS = 350;   /* blokir klik pasca-drag */
+
+        /* State animasi popup */
+        var lbCloseTimer = null;    /* menutup: set hidden setelah fade selesai */
+        var lbOutTimer = null;      /* tukar src setelah fade-out */
+        var lbLoadTimer = null;     /* pengaman onload */
+        var lbToken = 0;            /* pembatal callback basi (swipe cepat/tutup/buka) */
+        var lbClosing = false;      /* sedang animasi tutup */
+        var lbSwitchPx = 0;         /* geseran jari saat switch popup dipicu */
+
+        /* State gestur slider halaman */
+        var dragIndex = 0;
+        var dragWidth = 1;
+
+        var clickGuardUntil = 0;    /* timestamp; klik palsu pasca-drag diblokir */
+
         function galleryLabel(i) {
             return (i + 1) + ' / ' + galleryCount;
         }
 
+        function armClickGuard() {
+            clickGuardUntil = performance.now() + CLICK_GUARD_MS;
+        }
+
+        function clickBlocked() {
+            return performance.now() < clickGuardUntil;
+        }
+
+        /* Mesin gestur geser bersama (slider halaman & popup):
+           kunci arah horizontal, rekam velocity, balas via callback. */
+        function makeSwipeGesture(el, opts) {
+            var pending = false, on = false, moved = false;
+            var startX = 0, startY = 0, dx = 0;
+            var sampleX = 0, sampleT = 0, vel = 0;
+
+            function start(e) {
+                if (!e.touches || e.touches.length !== 1 || !opts.canStart()) return;
+                pending = true;
+                on = false;
+                moved = false;
+                dx = 0;
+                vel = 0;
+                startX = sampleX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                sampleT = performance.now();
+            }
+
+            function move(e) {
+                if (!pending || !e.touches || e.touches.length !== 1) return;
+                var x = e.touches[0].clientX;
+                var d = x - startX;
+                if (opts.reduced) {             /* tanpa drag-follow: rekam arah saja */
+                    dx = d;
+                    if (Math.abs(d) > DRAG_CLICK_PX) moved = true;
+                    return;
+                }
+                if (!on) {
+                    var dy = e.touches[0].clientY - startY;
+                    if (Math.abs(d) < DRAG_LOCK_PX && Math.abs(dy) < DRAG_LOCK_PX) return;
+                    if (Math.abs(dy) >= Math.abs(d)) {      /* niat vertikal: biarkan browser scroll */
+                        pending = false;
+                        return;
+                    }
+                    on = true;
+                    opts.followStart();
+                }
+                dx = d;
+                if (Math.abs(d) > DRAG_CLICK_PX) moved = true;
+                var now = performance.now();
+                if (now - sampleT > 12) {       /* velocity px/ms, dihaluskan */
+                    vel = vel * 0.6 + ((x - sampleX) / (now - sampleT)) * 0.4;
+                    sampleX = x;
+                    sampleT = now;
+                }
+                opts.onFollow(d);
+            }
+
+            function end(cancelled) {
+                if (!pending) return;
+                var state = {
+                    on: on,
+                    moved: moved,
+                    cancelled: cancelled,
+                    dx: dx,
+                    vel: vel,
+                    idle: performance.now() - sampleT
+                };
+                pending = false;
+                on = false;
+                moved = false;
+                dx = 0;
+                vel = 0;
+                if (state.moved) armClickGuard();
+                opts.onRelease(state);
+            }
+
+            el.addEventListener('touchstart', function (e) {
+                if (!e.touches || e.touches.length !== 1) { end(true); return; }
+                start(e);
+            }, { passive: true });
+            el.addEventListener('touchmove', move, { passive: true });
+            el.addEventListener('touchend', function () { end(false); }, { passive: true });
+            el.addEventListener('touchcancel', function () { end(true); }, { passive: true });
+        }
+
+        /* ---------- popup: crossfade ganti gambar ---------- */
+        function lbCanAnimateSwitch() {
+            return !!lightbox && !!lightboxImage && !lightbox.hidden && !lbClosing &&
+                !prefersReducedMotion && lightbox.classList.contains('is-open');
+        }
+
+        function lbCancelSwitch() {
+            lbToken++;
+            clearTimeout(lbOutTimer); lbOutTimer = null;
+            clearTimeout(lbLoadTimer); lbLoadTimer = null;
+            if (!lightboxImage) return;
+            lightboxImage.classList.remove('is-switching');
+            lightboxImage.style.transition = '';
+            lightboxImage.style.removeProperty('--lb-shift');
+        }
+
+        function lbFinishSwitch(token) {
+            if (token !== lbToken || !lightboxImage) return;    /* rantai basi: abaikan */
+            clearTimeout(lbOutTimer); lbOutTimer = null;
+            clearTimeout(lbLoadTimer); lbLoadTimer = null;
+            lightboxImage.style.setProperty('--lb-shift', '0px');
+            lightboxImage.classList.remove('is-switching');     /* fade-in + geser masuk */
+        }
+
+        function lbStartSwitch(src, dir, dragPx) {
+            lbToken++;
+            var token = lbToken;
+            clearTimeout(lbOutTimer); clearTimeout(lbLoadTimer);
+            /* Fase 1: gambar lama fade-out sambil keluar melanjutkan arah geseran. */
+            var out = Math.max(LB_SHIFT_PX, Math.abs(dragPx || 0) + LB_SHIFT_PX);
+            lightboxImage.style.setProperty('--lb-shift', (dir >= 0 ? -out : out) + 'px');
+            lightboxImage.classList.add('is-switching');
+            lbOutTimer = setTimeout(function () {
+                if (token !== lbToken) return;
+                /* Fase 2: src ditukar saat gambar tak terlihat. Lompat instan ke sisi masuk
+                   (transisi transform dimatikan sesaat) supaya arah masuk selalu benar
+                   walau gambar sudah ter-cache. */
+                lightboxImage.style.transition = 'opacity 0.18s ease';
+                lightboxImage.style.setProperty('--lb-shift', (dir >= 0 ? LB_SHIFT_PX : -LB_SHIFT_PX) + 'px');
+                void lightboxImage.offsetWidth;
+                lightboxImage.style.transition = '';
+                lightboxImage.onload = function () { lbFinishSwitch(token); };
+                lightboxImage.onerror = function () { lbFinishSwitch(token); };
+                lightboxImage.src = src;
+                /* cache memory: onload bisa tidak terpanggil walau gambar siap */
+                if (lightboxImage.complete && lightboxImage.naturalWidth > 0) lbFinishSwitch(token);
+                lbLoadTimer = setTimeout(function () { lbFinishSwitch(token); }, LB_LOAD_MS);
+            }, LB_OUT_MS);
+        }
+
+        function setLightboxImage(index, dir) {
+            if (!lightboxImage || !gallerySlides[index]) return;
+            var slide = gallerySlides[index];
+            var dragPx = lbSwitchPx;
+            lbSwitchPx = 0;
+            lightboxImage.alt = slide.alt || 'Pratinjau gambar project';
+            if (lightboxImage.getAttribute('src') === slide.src) {
+                /* gambar sama; kalau baru dilepas dari drag, kembalikan posisinya */
+                if (dragPx) lightboxImage.style.setProperty('--lb-shift', '0px');
+                return;
+            }
+            if (lbCanAnimateSwitch()) {
+                lbStartSwitch(slide.src, dir, dragPx);
+                return;
+            }
+            lbCancelSwitch();                               /* popup tertutup/instan: set langsung */
+            lightboxImage.src = slide.src;
+        }
+
         function galleryGoTo(i) {
             if (!galleryCount) return;
+            var prev = galleryIndex;
             galleryIndex = ((i % galleryCount) + galleryCount) % galleryCount;
+            var dir = 1;                                    /* +1 maju (masuk dari kanan), -1 mundur */
+            if ((prev + 1) % galleryCount === galleryIndex) dir = 1;
+            else if ((prev - 1 + galleryCount) % galleryCount === galleryIndex) dir = -1;
+            else if (galleryIndex < prev) dir = -1;
             if (galleryTrack) {
                 galleryTrack.style.transform = 'translateX(-' + (galleryIndex * 100) + '%)';
             }
             if (galleryCounter) galleryCounter.textContent = galleryLabel(galleryIndex);
-            if (lightboxImage) {
-                lightboxImage.src = gallerySlides[galleryIndex].src;
-                lightboxImage.alt = gallerySlides[galleryIndex].alt || 'Pratinjau gambar project';
-            }
             if (lightboxCounter) lightboxCounter.textContent = galleryLabel(galleryIndex);
+            setLightboxImage(galleryIndex, dir);
         }
 
+        /* Gambar popup belum siap (jaringan lambat): tahan opacity 0 sampai load. */
+        function lbHoldUntilLoaded() {
+            if (!lightboxImage || prefersReducedMotion) return;
+            if (lightboxImage.complete && lightboxImage.naturalWidth > 0) return;
+            lbToken++;
+            var token = lbToken;
+            lightboxImage.classList.add('is-switching');
+            lightboxImage.onload = function () { lbFinishSwitch(token); };
+            lightboxImage.onerror = function () { lbFinishSwitch(token); };
+            clearTimeout(lbLoadTimer);
+            lbLoadTimer = setTimeout(function () { lbFinishSwitch(token); }, LB_LOAD_MS);
+        }
+
+        /* ---------- popup: buka/tutup beranimasi ---------- */
         function galleryOpen(i) {
             if (!lightbox || !galleryCount) return;
+            clearTimeout(lbCloseTimer);
+            lbCloseTimer = null;
+            lbClosing = false;
+            lbCancelSwitch();
+            /* penting: src di-set saat popup masih hidden → set langsung tanpa animasi */
             galleryGoTo(typeof i === 'number' ? i : galleryIndex);
             lightbox.hidden = false;
             document.body.style.overflow = 'hidden';
+            if (prefersReducedMotion) {
+                lightbox.classList.add('is-open');          /* CSS transisi = none */
+            } else {
+                void lightbox.offsetWidth;                  /* commit frame tertutup agar fade jalan */
+                lightbox.classList.add('is-open');
+            }
             if (lightboxClose) lightboxClose.focus();
+            lbHoldUntilLoaded();
+        }
+
+        function lbFinalizeClose() {
+            clearTimeout(lbCloseTimer);
+            lbCloseTimer = null;
+            lbClosing = false;
+            if (lightbox) lightbox.hidden = true;
+            if (lightboxImage) lightboxImage.style.removeProperty('--lb-shift');
         }
 
         function galleryClose() {
-            if (!lightbox) return;
-            lightbox.hidden = true;
+            if (!lightbox || lightbox.hidden || lbClosing) return;
+            lbClosing = true;
+            lbToken++;                                      /* hentikan rantai ganti gambar */
+            clearTimeout(lbOutTimer); lbOutTimer = null;
+            clearTimeout(lbLoadTimer); lbLoadTimer = null;
+            if (lightboxImage) {
+                lightboxImage.classList.remove('is-switching');
+                lightboxImage.style.transition = '';
+                lightboxImage.style.removeProperty('--lb-shift');
+            }
+            lightbox.classList.remove('is-open');           /* memulai fade-out */
             document.body.style.overflow = '';
+            if (prefersReducedMotion) {
+                lbFinalizeClose();
+                return;
+            }
+            clearTimeout(lbCloseTimer);
+            lbCloseTimer = setTimeout(lbFinalizeClose, LB_CLOSE_MS);
         }
 
+        /* ---------- slider halaman: drag mengikuti jari ---------- */
+        makeSwipeGesture(gallery, {
+            reduced: prefersReducedMotion,
+            canStart: function () {
+                if (galleryCount <= 1 || !galleryTrack) return false;
+                dragIndex = galleryIndex;
+                dragWidth = gallery.getBoundingClientRect().width || 1;   /* 1 baca layout per gestur */
+                return true;
+            },
+            followStart: function () {
+                galleryTrack.classList.add('is-dragging');
+            },
+            onFollow: function (d) {
+                var eff = d;
+                if ((dragIndex === 0 && d > 0) || (dragIndex === galleryCount - 1 && d < 0)) {
+                    eff = d * DRAG_RUBBER;                  /* rubber-band di slide ujung */
+                }
+                galleryTrack.style.transform =
+                    'translateX(calc(' + (-dragIndex * 100) + '% + ' + eff.toFixed(1) + 'px))';
+            },
+            onRelease: function (state) {
+                if (!state.on && !state.moved) return;      /* gestur batal tanpa pergeseran */
+                if (state.on) {
+                    galleryTrack.classList.remove('is-dragging');
+                    void galleryTrack.offsetWidth;          /* commit posisi drag sebelum transition hidup */
+                }
+                var target = galleryIndex;
+                if (!state.cancelled) {
+                    if (prefersReducedMotion) {
+                        if (Math.abs(state.dx) >= 40) target = galleryIndex + (state.dx < 0 ? 1 : -1);
+                    } else {
+                        var vel = state.idle > 120 ? 0 : state.vel;    /* jari berhenti: bukan flick */
+                        var threshold = Math.max(42, Math.min(96, dragWidth * DRAG_DIST_RATIO));
+                        if (Math.abs(state.dx) >= threshold) target = galleryIndex + (state.dx < 0 ? 1 : -1);
+                        else if (Math.abs(vel) >= DRAG_VELOCITY) target = galleryIndex + (vel < 0 ? 1 : -1);
+                    }
+                    if (target < 0) target = 0;
+                    if (target > galleryCount - 1) target = galleryCount - 1;   /* drag tidak wrap */
+                }
+                galleryGoTo(target);
+            }
+        });
+
+        /* ---------- popup: drag mengikuti jari, lepas → crossfade ---------- */
+        if (lightbox) {
+            makeSwipeGesture(lightbox, {
+                reduced: prefersReducedMotion,
+                canStart: function () {
+                    return galleryCount > 1 && !!lightboxImage && !lbClosing &&
+                        lightbox.classList.contains('is-open') &&
+                        !lightboxImage.classList.contains('is-switching');
+                },
+                followStart: function () {
+                    lightboxImage.classList.add('is-dragging');
+                },
+                onFollow: function (d) {
+                    lightboxImage.style.setProperty('--lb-shift', d.toFixed(1) + 'px');
+                },
+                onRelease: function (state) {
+                    if (!state.on && !state.moved) return;
+                    if (state.on) {
+                        lightboxImage.classList.remove('is-dragging');
+                        void lightboxImage.offsetWidth;     /* commit posisi drag sebelum transition hidup */
+                    }
+                    var target = galleryIndex;
+                    if (!state.cancelled) {
+                        if (prefersReducedMotion) {
+                            if (Math.abs(state.dx) >= 40) target = galleryIndex + (state.dx < 0 ? 1 : -1);
+                        } else {
+                            var vel = state.idle > 120 ? 0 : state.vel;
+                            var threshold = Math.max(42, Math.min(96, (window.innerWidth || 1) * DRAG_DIST_RATIO));
+                            if (Math.abs(state.dx) >= threshold) target = galleryIndex + (state.dx < 0 ? 1 : -1);
+                            else if (Math.abs(vel) >= DRAG_VELOCITY) target = galleryIndex + (vel < 0 ? 1 : -1);
+                        }
+                    }
+                    target = ((target % galleryCount) + galleryCount) % galleryCount;   /* popup: wrap */
+                    if (target !== galleryIndex) {
+                        lbSwitchPx = state.dx;              /* arah keluar melanjutkan geseran */
+                        galleryGoTo(target);
+                    } else if (state.on) {
+                        lightboxImage.style.setProperty('--lb-shift', '0px');   /* spring back */
+                    }
+                }
+            });
+        }
+
+        /* ---------- kontrol ---------- */
         if (galleryCount <= 1) {
             [galleryPrev, galleryNext, galleryExpand, galleryCounter].forEach(function (el) {
                 if (el) el.style.display = 'none';
@@ -346,54 +664,44 @@
                 if (el) el.style.display = 'none';
             });
         }
-        if (galleryPrev) galleryPrev.addEventListener('click', function () { galleryGoTo(galleryIndex - 1); });
-        if (galleryNext) galleryNext.addEventListener('click', function () { galleryGoTo(galleryIndex + 1); });
-        if (galleryExpand) galleryExpand.addEventListener('click', function () { galleryOpen(galleryIndex); });
-        Array.prototype.forEach.call(gallerySlides, function (img, i) {
-            img.addEventListener('click', function () { galleryOpen(i); });
+        if (galleryPrev) galleryPrev.addEventListener('click', function () {
+            if (clickBlocked()) return;
+            galleryGoTo(galleryIndex - 1);
         });
-        if (lightboxPrev) lightboxPrev.addEventListener('click', function (e) { e.stopPropagation(); galleryGoTo(galleryIndex - 1); });
-        if (lightboxNext) lightboxNext.addEventListener('click', function (e) { e.stopPropagation(); galleryGoTo(galleryIndex + 1); });
+        if (galleryNext) galleryNext.addEventListener('click', function () {
+            if (clickBlocked()) return;
+            galleryGoTo(galleryIndex + 1);
+        });
+        if (galleryExpand) galleryExpand.addEventListener('click', function () {
+            if (clickBlocked()) return;                     /* klik palsu pasca-drag */
+            galleryOpen(galleryIndex);
+        });
+        Array.prototype.forEach.call(gallerySlides, function (img, i) {
+            img.addEventListener('click', function () {
+                if (clickBlocked()) return;                 /* klik palsu pasca-drag */
+                galleryOpen(i);
+            });
+        });
+        if (lightboxPrev) lightboxPrev.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (clickBlocked()) return;
+            galleryGoTo(galleryIndex - 1);
+        });
+        if (lightboxNext) lightboxNext.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (clickBlocked()) return;
+            galleryGoTo(galleryIndex + 1);
+        });
         if (lightboxClose) lightboxClose.addEventListener('click', galleryClose);
         if (lightbox) lightbox.addEventListener('click', function (e) {
-            if (e.target === lightbox) galleryClose();
+            if (e.target === lightbox && !clickBlocked()) galleryClose();
         });
         document.addEventListener('keydown', function (e) {
-            if (!lightbox || lightbox.hidden) return;
+            if (!lightbox || lightbox.hidden || lbClosing) return;
             if (e.key === 'Escape') galleryClose();
             if (e.key === 'ArrowLeft') galleryGoTo(galleryIndex - 1);
             if (e.key === 'ArrowRight') galleryGoTo(galleryIndex + 1);
         });
-        var galleryTouchX = null;
-        if (gallery) {
-            gallery.addEventListener('touchstart', function (e) {
-                galleryTouchX = e.touches[0].clientX;
-            }, { passive: true });
-            gallery.addEventListener('touchend', function (e) {
-                if (galleryTouchX === null) return;
-                var dx = e.changedTouches[0].clientX - galleryTouchX;
-                galleryTouchX = null;
-                if (Math.abs(dx) < 40) return;
-                galleryGoTo(galleryIndex + (dx < 0 ? 1 : -1));
-            }, { passive: true });
-        }
-        /* Geser popup dengan jari (mobile): pola sama seperti slider,
-           dipasang pada overlay lightbox yang sedang terbuka. */
-        var lightboxTouchX = null;
-        if (lightbox) {
-            lightbox.addEventListener('touchstart', function (e) {
-                if (!e.touches || !e.touches.length) return;
-                lightboxTouchX = e.touches[0].clientX;
-            }, { passive: true });
-            lightbox.addEventListener('touchend', function (e) {
-                if (lightbox.hidden || lightboxTouchX === null) return;
-                if (!e.changedTouches || !e.changedTouches.length) return;
-                var dx = e.changedTouches[0].clientX - lightboxTouchX;
-                lightboxTouchX = null;
-                if (Math.abs(dx) < 40) return;
-                galleryGoTo(galleryIndex + (dx < 0 ? 1 : -1));
-            }, { passive: true });
-        }
         galleryGoTo(0);
     }
 

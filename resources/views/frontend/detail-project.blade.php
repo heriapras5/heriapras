@@ -116,7 +116,7 @@
 @if($project->features->count())
 <section class="bg-night border-t border-white/5">
     <div class="max-w-6xl mx-auto px-5 py-12">
-        <h2 class="section-title mt-2">Yang dikerjakan dalam project ini</h2>
+        <h2 class="section-title mt-2">Fitur-Fitur</h2>
         <ul class="mt-6 grid gap-4 md:grid-cols-2">
             @foreach($project->features as $feature)
                 <li class="card-soft p-5">

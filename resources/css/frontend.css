@@ -433,6 +433,9 @@ html.js .reveal.revealed {
 .project-gallery {
     position: relative;
     overflow: hidden;
+    /* Geser horizontal ditangani JS (drag mengikuti jari); pan vertikal milik browser.
+       Efek samping: pinch/double-tap zoom nonaktif di area galeri ini. */
+    touch-action: pan-y;
 }
 
 .project-gallery-viewport {
@@ -441,7 +444,14 @@ html.js .reveal.revealed {
 
 .project-gallery-track {
     display: flex;
-    transition: transform 0.35s ease;
+    transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Saat jari menempel: track mengikuti tanpa jeda transisi.
+   will-change hanya aktif selama gestur (hindari layer permanen berisi semua slide). */
+.project-gallery-track.is-dragging {
+    transition: none;
+    will-change: transform;
 }
 
 .project-gallery-slide {
@@ -535,7 +545,9 @@ html.js .reveal.revealed {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .project-gallery-track {
+    .project-gallery-track,
+    .project-lightbox,
+    .project-lightbox img {
         transition: none;
     }
 }
@@ -552,6 +564,13 @@ html.js .reveal.revealed {
     padding: 1rem;
     /* Geser horizontal ditangani JS; biarkan browser menangani pan vertikal. */
     touch-action: pan-y;
+    /* Fade buka/tutup; .is-open ditambahkan JS satu frame setelah hidden dilepas. */
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.project-lightbox.is-open {
+    opacity: 1;
 }
 
 .project-lightbox[hidden] {
@@ -566,6 +585,26 @@ html.js .reveal.revealed {
     object-fit: contain;
     background: #0c0c22;
     touch-action: pan-y;
+    /* --lb-shift diisi JS saat drag/ganti gambar; scale dipakai saat buka/tutup. */
+    --lb-shift: 0px;
+    opacity: 0;
+    transform: translateX(var(--lb-shift)) scale(0.96);
+    transition: opacity 0.18s ease, transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.project-lightbox.is-open img {
+    opacity: 1;
+    transform: translateX(var(--lb-shift)) scale(1);
+}
+
+/* Fase fade-out saat ganti gambar: gambar disembunyikan, src ditukar JS di baliknya. */
+.project-lightbox.is-open img.is-switching {
+    opacity: 0;
+}
+
+/* Drag popup: transition dimatikan selama jari menempel. */
+.project-lightbox.is-open img.is-dragging {
+    transition: none;
 }
 
 .project-lightbox .project-gallery-nav {
