@@ -26,20 +26,20 @@
     <style>
         body {
             font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
-            background: linear-gradient(145deg, #060d24 0%, #0c1a3a 25%, #143264 50%, #1c4a8c 75%, #2563eb 100%);
+            background: linear-gradient(145deg, #f8fafc 0%, #eef4ff 45%, #e0ecff 100%);
         }
 
         .deco-ring {
             position: absolute;
             border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(37, 99, 235, 0.10);
             pointer-events: none;
         }
 
         .deco-dot {
             position: absolute;
             border-radius: 50%;
-            background: rgba(255,255,255,0.07);
+            background: rgba(37, 99, 235, 0.08);
             pointer-events: none;
         }
 
@@ -51,7 +51,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background-image: radial-gradient(circle, rgba(255,255,255,0.18) 1.5px, transparent 1.5px);
+            background-image: radial-gradient(circle, rgba(37, 99, 235, 0.16) 1.5px, transparent 1.5px);
             background-size: 22px 22px;
         }
 
@@ -63,7 +63,7 @@
         .deco-thin-line {
             position: absolute;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+            background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.12), transparent);
             pointer-events: none;
             transform: rotate(-30deg);
         }
@@ -88,9 +88,9 @@
     <div class="dot-grid w-[140px] h-[100px] bottom-16 left-8"></div>
     <div class="deco-angular bottom-0 right-0 w-[350px] h-[350px]">
         <svg viewBox="0 0 350 350" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-            <polygon points="350,350 150,350 350,100" fill="rgba(255,255,255,0.04)"/>
-            <polygon points="350,350 250,350 350,200" fill="rgba(255,255,255,0.03)"/>
-            <polygon points="350,350 100,350 200,250 350,150" fill="rgba(255,255,255,0.02)"/>
+            <polygon points="350,350 150,350 350,100" fill="rgba(37, 99, 235, 0.06)"/>
+            <polygon points="350,350 250,350 350,200" fill="rgba(37, 99, 235, 0.045)"/>
+            <polygon points="350,350 100,350 200,250 350,150" fill="rgba(37, 99, 235, 0.03)"/>
         </svg>
     </div>
     <div class="deco-thin-line w-[400px] top-[15%] -left-10"></div>
@@ -173,7 +173,7 @@
 
         </div>
 
-        <p class="text-center text-white/60 text-[10px] mt-5">&copy; {{ date('Y') }} <span class="text-blue-300 font-medium">{{ $siteName }}</span>. All rights reserved.</p>
+        <p class="text-center text-[#94a3b8] text-[10px] mt-5">&copy; {{ date('Y') }} <span class="text-blue-600 font-medium">{{ $siteName }}</span>. All rights reserved.</p>
     </div>
 </body>
 </html>

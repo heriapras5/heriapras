@@ -1,11 +1,11 @@
 @extends('admin.layouts.app')
-@section('title', 'Keahlian')
+@section('title', 'Teknologi Hero')
 @section('content')
-<x-admin.breadcrumb :items="[['label' => 'Dashboard', 'url' => route('admin.dashboard')], ['label' => 'Keahlian']]" />
-<x-admin.section-title title="Daftar Keahlian" subtitle="Kelola keahlian halaman utama">
-    <x-slot:actions><x-admin.add-button route="admin.services.create" label="Tambah Keahlian" /></x-slot:actions>
+<x-admin.breadcrumb :items="[['label' => 'Dashboard', 'url' => route('admin.dashboard')], ['label' => 'Teknologi Hero']]" />
+<x-admin.section-title title="Teknologi Hero" subtitle="Ikon teknologi yang tampil pada Hero Section halaman utama">
+    <x-slot:actions><x-admin.add-button route="admin.services.create" label="Tambah Teknologi" /></x-slot:actions>
 </x-admin.section-title>
-<x-admin.search route="admin.services.index" placeholder="Cari keahlian..." />
+<x-admin.search route="admin.services.index" placeholder="Cari teknologi..." />
 <x-admin.table>
     <x-slot:head>
         <x-admin.th class="w-10">No</x-admin.th>
@@ -31,7 +31,7 @@
         <x-admin.td><x-admin.actions edit="admin.services.edit" destroy="admin.services.destroy" :params="[$s]" /></x-admin.td>
     </tr>
     @empty
-    <x-admin.empty-state :colspan="8" message="Belum ada keahlian." />
+    <x-admin.empty-state :colspan="8" message="Belum ada teknologi hero." />
     @endforelse
     <x-slot:footer>
         <p>Menampilkan {{ $services->firstItem() ?? 0 }} sampai {{ $services->lastItem() ?? 0 }} dari {{ $services->total() }} data</p>

@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AboutSection;
-use App\Models\TimelineItem;
+use App\Models\ProjectCategory;
 use App\Services\Frontend\FrontendService;
 use Illuminate\Http\Request;
 
@@ -15,37 +14,31 @@ class FrontendController extends Controller
 
     public function home()
     {
-        $aboutSection = AboutSection::where('is_active', true)->first();
+        $projects = $this->frontendService->getProjects(6);
+        $skills = $this->frontendService->getServices()->filter(fn ($service) => $service->type !== 'service');
+
+        return view('frontend.home', compact('projects', 'skills'));
+    }
+
+    public function portfolioIndex(Request $request)
+    {
+        // Hanya kategori yang memiliki minimal satu project aktif yang tampil sebagai tab.
+        $categories = ProjectCategory::where('status', true)
+            ->whereHas('projects', fn ($q) => $q->where('projects.status', true))
+            ->orderBy('sort_order')
+            ->get();
         $projects = $this->frontendService->getProjects();
-        $categories = $this->frontendService->getProjectCategories();
-        $allServices = $this->frontendService->getServices();
-        $skills = $allServices->filter(fn ($service) => $service->type !== 'service');
-        $timeline = TimelineItem::where('is_active', true)->orderBy('sort_order')->get();
-        $educationItems = $timeline->where('type', 'education');
-        $experienceItems = $timeline->where('type', '!=', 'education');
+        $activeCategory = null;
+        if ($request->query('kategori')) {
+            $activeCategory = $categories->firstWhere('slug', $request->query('kategori'));
+            if ($activeCategory) {
+                $projects = $projects->filter(
+                    fn ($project) => $project->categories->contains('id', $activeCategory->id)
+                )->values();
+            }
+        }
 
-        // Kumpulkan kategori dari relasi pivot (sumber utama) + kolom legacy category_id.
-        $usedCategoryIds = $projects->flatMap(fn ($project) => $project->categories->pluck('id'))
-            ->merge($projects->pluck('category_id'))
-            ->filter()->unique()->values();
-        $portfolioCategories = $categories->whereIn('id', $usedCategoryIds)->values();
-
-        $stats = [
-            ['value' => $projects->count(), 'label' => 'Project', 'sub' => 'karya portofolio', 'icon' => 'bi-journal-code'],
-            ['value' => $portfolioCategories->count(), 'label' => 'Kategori', 'sub' => 'jenis project', 'icon' => 'bi-collection'],
-            ['value' => $skills->count(), 'label' => 'Keahlian', 'sub' => 'teknologi dikuasai', 'icon' => 'bi-lightbulb'],
-        ];
-        $stats = array_values(array_filter($stats, fn ($stat) => $stat['value'] > 0));
-
-        return view('frontend.home', compact(
-            'aboutSection',
-            'projects',
-            'portfolioCategories',
-            'skills',
-            'educationItems',
-            'experienceItems',
-            'stats'
-        ));
+        return view('frontend.portfolio-index', compact('projects', 'categories', 'activeCategory'));
     }
 
     public function portfolioDetail($slug)
@@ -200,20 +193,6 @@ class FrontendController extends Controller
             'Content-Type' => 'image/png',
             'Cache-Control' => 'public, max-age=31536000, immutable',
         ]);
-    }
-
-    public function sendMessage(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'service' => 'nullable|string|max:255',
-            'message' => 'required|string',
-        ]);
-        $this->frontendService->submitContact($validated);
-
-        return back()->with('success', 'Pesan berhasil dikirim. Terima kasih sudah menghubungi saya.');
     }
 
     protected function resolveAssetPath(string $path): ?string

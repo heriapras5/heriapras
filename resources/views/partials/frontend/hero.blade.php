@@ -10,7 +10,7 @@
 <section id="hero" class="relative overflow-hidden bg-abyss">
     <div class="dots-grid absolute top-16 right-8 md:right-24 w-28 h-24 opacity-60" aria-hidden="true"></div>
     <div class="max-w-6xl mx-auto px-5 pt-12 pb-14 md:pt-16 md:pb-20 grid gap-12 lg:grid-cols-2 items-center relative">
-        <div class="reveal">
+        <div class="reveal order-2 lg:order-1">
             <p class="text-base text-body">Halo, Nama Saya</p>
             <h1 class="text-white font-extrabold leading-[1.12] text-4xl md:text-5xl">
                 <span class="text-glow">{{ $fullName }}</span>
@@ -38,19 +38,19 @@
                 </div>
             </div>
         </div>
-        <div class="reveal relative flex justify-center lg:justify-end">
+        <div class="reveal relative flex justify-center lg:justify-end order-1 lg:order-2">
             <div class="relative">
-                <div class="w-72 h-72 md:w-[22rem] md:h-[22rem] rounded-full bg-primary overflow-hidden" aria-hidden="false">
+                <div class="w-48 h-48 sm:w-60 sm:h-60 md:w-[22rem] md:h-[22rem] rounded-full bg-primary overflow-hidden" aria-hidden="false">
                     @if($profilePhotoExists)
                         <img src="{{ asset($profilePhoto) }}{{ $profilePhotoVersion ? '?v='.$profilePhotoVersion : '' }}" alt="Foto {{ $fullName }}"
                              class="w-full h-full object-cover object-top"
                              onerror="this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='flex'">
                         <div class="w-full h-full items-center justify-center bg-primary" style="display:none" aria-hidden="true">
-                            <span class="font-extrabold text-7xl text-white">{{ $initials ?: 'HA' }}</span>
+                            <span class="font-extrabold text-5xl md:text-7xl text-white">{{ $initials ?: 'HA' }}</span>
                         </div>
                     @else
                         <div class="w-full h-full flex items-center justify-center bg-primary" aria-hidden="true">
-                            <span class="font-extrabold text-7xl text-white">{{ $initials ?: 'HA' }}</span>
+                            <span class="font-extrabold text-5xl md:text-7xl text-white">{{ $initials ?: 'HA' }}</span>
                         </div>
                     @endif
                 </div>

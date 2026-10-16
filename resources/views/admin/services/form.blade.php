@@ -1,9 +1,9 @@
 @extends('admin.layouts.app')
-@section('title', $service->exists ? 'Edit Keahlian' : 'Tambah Keahlian')
+@section('title', $service->exists ? 'Edit Teknologi Hero' : 'Tambah Teknologi Hero')
 @section('content')
-<x-admin.breadcrumb :items="[['label' => 'Dashboard', 'url' => route('admin.dashboard')], ['label' => 'Keahlian', 'url' => route('admin.services.index')], ['label' => $service->exists ? 'Edit' : 'Tambah']]" />
+<x-admin.breadcrumb :items="[['label' => 'Dashboard', 'url' => route('admin.dashboard')], ['label' => 'Teknologi Hero', 'url' => route('admin.services.index')], ['label' => $service->exists ? 'Edit' : 'Tambah']]" />
 <div class="max-w-2xl">
-    <x-admin.form-card :title="$service->exists ? 'Edit Keahlian' : 'Tambah Keahlian'" :description="$service->exists ? 'Ubah data keahlian.' : 'Buat keahlian baru.'">
+    <x-admin.form-card :title="$service->exists ? 'Edit Teknologi Hero' : 'Tambah Teknologi Hero'" :description="$service->exists ? 'Ubah ikon teknologi pada Hero Section.' : 'Tambah ikon teknologi baru pada Hero Section.'">
         <form action="{{ $service->exists ? route('admin.services.update', $service) : route('admin.services.store') }}" method="POST" class="space-y-5">
             @csrf @if($service->exists) @method('PUT') @endif
             <x-admin.input name="title" label="Nama" :value="$service->title" required />
@@ -11,7 +11,7 @@
                 <input type="hidden" name="type" value="skill">
                 <x-admin.select name="group_name" label="Kategori" :options="['Frontend' => 'Frontend', 'Backend' => 'Backend', 'Tools' => 'Tools', 'Database' => 'Database']" :selected="old('group_name', $service->group_name ?? 'Frontend')" />
             </div>
-            <p class="form-hint -mt-3">Keahlian tampil di section Keahlian (progress bar).</p>
+            <p class="form-hint -mt-3">Teknologi tampil sebagai ikon pada Hero Section (maks 7 ditampilkan).</p>
             @php
                 $iconOptions = [
                     'globe' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',

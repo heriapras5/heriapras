@@ -54,39 +54,4 @@ class SettingsImageUploadTest extends TestCase
         $stored = \App\Models\Setting::where('key', 'logo_image')->value('value');
         $this->assertNotEmpty($stored, 'logo_image setting must be saved');
     }
-
-    public function test_about_image_upload_persists(): void
-    {
-        $this->admin();
-        Storage::fake('public');
-
-        $file = UploadedFile::fake()->image('tentang.jpg', 600, 400);
-
-        $response = $this->put(route('admin.settings.update'), [
-            'about_image' => $file,
-        ]);
-
-        $response->assertRedirect(route('admin.settings.index'));
-
-        $image = \App\Models\AboutSection::where('is_active', true)->value('image');
-        $this->assertNotEmpty($image, 'about image must be saved');
-    }
-
-    public function test_hero_background_upload_persists(): void
-    {
-        $this->admin();
-        Storage::fake('public');
-
-        $file = UploadedFile::fake()->image('hero-bg.jpg', 1600, 900);
-
-        $response = $this->put(route('admin.settings.update'), [
-            'hero_background' => $file,
-        ]);
-
-        $response->assertRedirect(route('admin.settings.index'));
-
-        $stored = \App\Models\Setting::where('key', 'hero_background')->value('value');
-        $this->assertNotEmpty($stored, 'hero_background setting must be saved');
-        Storage::disk('public')->assertExists(str_replace('storage/', '', $stored));
-    }
 }

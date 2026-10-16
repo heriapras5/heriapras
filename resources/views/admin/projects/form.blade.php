@@ -26,7 +26,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <x-admin.input name="url" label="Live URL" type="url" :value="$project->url" placeholder="https://..." />
+                    <x-admin.input name="url" label="Link Demo" type="url" :value="$project->url" placeholder="https://..." help="Tampil sebagai Link Demo di halaman detail. Kosongkan bila belum ada." />
                     <x-admin.input name="client" label="Project Context" :value="$project->client" placeholder="Nama brand atau konteks project" />
                     <x-admin.input name="year" label="Tahun" :value="$project->year" placeholder="2026" />
                     <x-admin.input name="duration" label="Durasi" :value="$project->duration" placeholder="2 bulan" />

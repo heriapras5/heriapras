@@ -371,9 +371,6 @@ if (! function_exists('personJsonLd')) {
         $sameAs = array_values(array_filter([
             setting('github_url', ''),
             setting('social_linkedin', ''),
-            setting('social_instagram', ''),
-            setting('social_facebook', ''),
-            setting('social_youtube', ''),
         ]));
         $person = [
             '@type' => 'Person',
@@ -382,13 +379,13 @@ if (! function_exists('personJsonLd')) {
             'url' => url('/'),
             'image' => setting('profile_photo') ? url(setting('profile_photo')) : url('/og-image.png'),
             'jobTitle' => setting('role', 'Web Developer & Software Engineer'),
-            'description' => setting('bio', 'Web Developer dan Software Engineer dengan latar belakang Sistem Informasi.'),
+            'description' => setting('bio', 'Nama saya Heri Agus Prasetyo, lulusan Universitas Mercu Buana Yogyakarta, Program Studi Sistem Informasi. Saya adalah seorang Web Developer yang berpengalaman membangun dan mengembangkan berbagai proyek website dan aplikasi berbasis web.'),
             'email' => setting('footer_email') ?: null,
             'telephone' => setting('whatsapp_number') ? '+'.setting('whatsapp_number') : null,
             'sameAs' => $sameAs,
             'alumniOf' => [
                 '@type' => 'CollegeOrUniversity',
-                'name' => setting('university', 'Universitas Mercu Buana Yogyakarta'),
+                'name' => 'Universitas Mercu Buana Yogyakarta',
             ],
             'knowsAbout' => ['Web Development', 'Software Engineering', 'Information Systems', 'PHP', 'Laravel', 'MySQL'],
         ];

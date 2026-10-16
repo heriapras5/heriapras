@@ -3,31 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AboutSection;
-use App\Models\Client;
-use App\Models\ContactInfo;
-use App\Models\CtaSection;
-use App\Models\HeroSection;
-use App\Models\Menu;
-use App\Models\Partner;
 use App\Models\Project;
 use App\Models\ProjectCategory;
-use App\Models\TimelineItem;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class StatusController extends Controller
 {
     protected array $map = [
-        'hero_sections' => [HeroSection::class, 'status'],
         'projects' => [Project::class, 'status'],
         'project_categories' => [ProjectCategory::class, 'status'],
-        'clients' => [Client::class, 'status'],
-        'partners' => [Partner::class, 'status'],
-        'menus' => [Menu::class, 'status'],
-        'contact_info' => [ContactInfo::class, 'status'],
-        'cta_sections' => [CtaSection::class, 'is_active'],
-        'about_sections' => [AboutSection::class, 'is_active'],
-        'portfolio_timeline_items' => [TimelineItem::class, 'is_active'],
+        'services' => [Service::class, 'status'],
     ];
 
     public function toggle(Request $request)

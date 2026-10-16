@@ -45,18 +45,15 @@
         ['label' => 'Menu Utama', 'items' => [
             ['label' => 'Dashboard', 'route' => route('admin.dashboard'), 'icon' => 'dashboard', 'active' => request()->routeIs('admin.dashboard')],
         ]],
-        ['label' => 'Konten Landing', 'items' => [
-            ['label' => 'Hero', 'route' => route('admin.hero-sections.index'), 'icon' => 'image', 'active' => request()->routeIs('admin.hero-sections*')],
-            ['label' => 'Tentang', 'route' => route('admin.about-sections.index'), 'icon' => 'users', 'active' => request()->routeIs('admin.about-sections*')],
-            ['label' => 'Perjalanan', 'route' => route('admin.timeline.index'), 'icon' => 'grid', 'active' => request()->routeIs('admin.timeline*')],
-            ['label' => 'Keahlian', 'route' => route('admin.services.index'), 'icon' => 'paket', 'active' => request()->routeIs('admin.services*')],
+        ['label' => 'Hero', 'items' => [
+            ['label' => 'Teknologi Hero', 'route' => route('admin.services.index'), 'icon' => 'paket', 'active' => request()->routeIs('admin.services*')],
         ]],
         ['label' => 'Portfolio', 'items' => [
             ['label' => 'Kategori Project', 'route' => route('admin.project-categories.index'), 'icon' => 'tag', 'active' => request()->routeIs('admin.project-categories*')],
             ['label' => 'Project', 'route' => route('admin.projects.index'), 'icon' => 'folder', 'active' => request()->routeIs('admin.projects*')],
         ]],
-        ['label' => 'Interaksi', 'items' => [
-            ['label' => 'Pesan Masuk', 'route' => route('admin.messages.index'), 'icon' => 'mail', 'active' => request()->routeIs('admin.messages*'), 'badge' => $unreadCount],
+        ['label' => 'Sistem', 'items' => [
+            ['label' => 'Pengaturan', 'route' => route('admin.settings.index'), 'icon' => 'settings', 'active' => request()->routeIs('admin.settings*')],
         ]],
     ];
     @endphp
@@ -84,7 +81,7 @@
             <nav class="flex-1 overflow-y-auto px-3 pb-3 sidebar-scroll">
                 @foreach($navGroups as $group)
                 <div>
-                    <div class="text-[0.55rem] tracking-[0.2em] text-white/25 uppercase font-semibold px-3 pt-4 pb-1.5 sidebar-text">{{ $group['label'] }}</div>
+                    <div class="text-[0.55rem] tracking-[0.2em] text-white/40 uppercase font-semibold px-3 pt-4 pb-1.5 sidebar-text">{{ $group['label'] }}</div>
                     @foreach($group['items'] as $item)
                     <a href="{{ $item['route'] }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 text-sm text-white/70 hover:text-white {{ $item['active'] ? 'active' : '' }}">
                         <x-admin.nav-icon :name="$item['icon']" />
@@ -97,28 +94,6 @@
                 </div>
                 @endforeach
 
-                <div class="text-[0.55rem] tracking-[0.2em] text-white/25 uppercase font-semibold px-3 pt-5 pb-1.5 sidebar-text">Sistem</div>
-
-                <div>
-                    <a href="{{ route('admin.seo.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 text-sm text-white/70 hover:text-white {{ request()->routeIs('admin.seo*') ? 'active' : '' }}">
-                        <x-admin.nav-icon name="seo" />
-                        <span class="flex-1 sidebar-text">Pengaturan SEO</span>
-                    </a>
-                </div>
-                <div>
-                    <a href="{{ route('admin.settings.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 text-sm text-white/70 hover:text-white {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
-                        <x-admin.nav-icon name="settings" />
-                        <span class="flex-1 sidebar-text">Pengaturan</span>
-                    </a>
-                </div>
-                @if(auth()->user()?->isSuperAdmin())
-                <div>
-                    <a href="{{ route('admin.users.index') }}" class="sidebar-link flex items-center gap-3 px-3 py-2.5 text-sm text-white/70 hover:text-white {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-                        <x-admin.nav-icon name="users" />
-                        <span class="flex-1 sidebar-text">Manajemen Admin</span>
-                    </a>
-                </div>
-                @endif
             </nav>
         </aside>
 
@@ -157,9 +132,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <a href="{{ route('admin.users.edit', auth()->user()) }}" class="flex items-center gap-2.5 px-4 py-3 text-sm text-[#1e293b] hover:bg-gray-50 transition-colors">
+                            <a href="{{ route('admin.settings.index') }}" class="flex items-center gap-2.5 px-4 py-3 text-sm text-[#1e293b] hover:bg-gray-50 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-[#94a3b8]"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                                Profil
+                                Pengaturan
                             </a>
                             <hr class="border-gray-100">
                             <button @click="window.confirmLogout()" class="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors">

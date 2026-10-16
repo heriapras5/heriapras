@@ -43,7 +43,7 @@
         });
     }
 
-    /* Scrollspy 6 anchor */
+    /* Scrollspy navbar */
     var spyLinks = document.querySelectorAll('[data-spy]');
     var sections = Array.prototype.map.call(spyLinks, function (link) {
         return document.getElementById(link.getAttribute('href').replace(/^.*#/, ''));
@@ -123,69 +123,16 @@
         }
     }
 
-    /* Counter statistik */
-    document.querySelectorAll('[data-count-to]').forEach(function (el) {
-        var target = parseInt(el.getAttribute('data-count-to'), 10);
-        if (isNaN(target)) return;
-        if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-            el.textContent = target;
-            return;
-        }
-        var counterObserver = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (!entry.isIntersecting) return;
-                counterObserver.unobserve(el);
-                var start = null, duration = 1200;
-                function step(timestamp) {
-                    if (!start) start = timestamp;
-                    var progress = Math.min((timestamp - start) / duration, 1);
-                    el.textContent = Math.round(target * (1 - Math.pow(1 - progress, 3)));
-                    if (progress < 1) requestAnimationFrame(step);
-                }
-                requestAnimationFrame(step);
-            });
-        }, { threshold: 0.5 });
-        counterObserver.observe(el);
-    });
-
-    /* Filter portfolio vanilla (pengganti Isotope) */
-    var filterButtons = document.querySelectorAll('[data-portfolio-filter]');
-    var portfolioItems = document.querySelectorAll('[data-portfolio-item]');
-    var filterTrack = document.getElementById('portfolio-track');
-    var filterRefresh = null; // diisi oleh blok marquee di bawah, dipanggil setelah filter
-    if (filterButtons.length && portfolioItems.length) {
-        filterButtons.forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var filter = btn.getAttribute('data-portfolio-filter');
-                filterButtons.forEach(function (b) {
-                    b.classList.toggle('active', b === btn);
-                    b.setAttribute('aria-pressed', String(b === btn));
-                });
-                portfolioItems.forEach(function (item) {
-                    var show = filter === '*' || item.classList.contains('filter-' + filter);
-                    item.classList.toggle('hidden', !show);
-                });
-                /* Set width berubah karena card tersembunyi: ukur ulang marquee
-                   dan pastikan posisi scroll masih di set pertama yang valid */
-                if (filterRefresh) filterRefresh();
-                if (filterTrack) {
-                    requestAnimationFrame(function () {
-                        var setW = filterTrack.scrollWidth / 2;
-                        if (setW > 0 && filterTrack.scrollLeft > setW + 4) {
-                            filterTrack.scrollLeft = filterTrack.scrollLeft - setW;
-                        }
-                    });
-                }
-            });
-        });
-    }
-
     /* Marquee portfolio: muter kontinu searah, tanpa lompat balik.
-       Isi track di-render 2x (set klon) sehingga pergeseran selalu mulus. */
+       Hanya berjalan di desktop (min-width 768px); di mobile track tampil
+       sebagai grid statis (klon disembunyikan via CSS). Isi track di-render
+       2x (set klon) sehingga pergeseran selalu mulus. */
     var portfolioTrack = document.getElementById('portfolio-track');
     var prevBtn = document.getElementById('portfolio-prev');
     var nextBtn = document.getElementById('portfolio-next');
     if (portfolioTrack && prevBtn && nextBtn) {
+        var portfolioMedia = window.matchMedia('(min-width: 768px)');
+        var portfolioFilter = 'all'; // filter tab aktif; marquee hanya jalan saat 'all'
         var portfolioOriginals = portfolioTrack.querySelectorAll('[data-portfolio-original]');
         var marqueeSpeed = 45; // px per detik (sedang)
         var marqueeRaf = null;
@@ -224,6 +171,8 @@
 
         function marqueeCanRun() {
             if (!portfolioOriginals.length) return false;
+            if (!portfolioMedia.matches) return false; // mobile: grid statis
+            if (portfolioFilter !== 'all') return false; // tab filter aktif: tampilkan hasil saja
             return marqueeSetW > portfolioTrack.clientWidth + 8;
         }
 
@@ -297,9 +246,11 @@
         }
         refreshPortfolioCarousel();
         startMarquee();
-        filterRefresh = refreshPortfolioCarousel; // dipakai hook filter di atas
         window.addEventListener('load', refreshPortfolioCarousel);
         window.addEventListener('resize', refreshPortfolioCarousel);
+        if (portfolioMedia.addEventListener) {
+            portfolioMedia.addEventListener('change', refreshPortfolioCarousel);
+        }
         if ('IntersectionObserver' in window) {
             var portfolioSection = document.getElementById('portfolio');
             if (portfolioSection) {
@@ -311,53 +262,123 @@
                 portfolioObserver.observe(portfolioSection);
             }
         }
-    }
 
-    /* Prefill select service dari CTA pricing */
-    document.querySelectorAll('[data-service-prefill]').forEach(function (link) {
-        link.addEventListener('click', function () {
-            var service = link.getAttribute('data-service-prefill');
-            setTimeout(function () {
-                var select = document.getElementById('contact-service');
-                if (select && service) {
-                    var matched = false;
-                    Array.prototype.forEach.call(select.options, function (opt) {
-                        if (opt.text === service || opt.value === service) {
-                            select.value = opt.value || opt.text;
-                            matched = true;
-                        }
+        /* Tab filter kategori (homepage): tampilkan card original yang cocok,
+           sembunyikan set klon agar tidak duplikat, dan hentikan marquee. */
+        var portfolioTabs = document.querySelectorAll('[data-portfolio-filter]');
+        if (portfolioTabs.length) {
+            Array.prototype.forEach.call(portfolioTabs, function (tab) {
+                tab.addEventListener('click', function () {
+                    portfolioFilter = tab.getAttribute('data-portfolio-filter') || 'all';
+                    Array.prototype.forEach.call(portfolioTabs, function (t) {
+                        var isActive = t === tab;
+                        t.setAttribute('data-portfolio-active', isActive ? 'true' : 'false');
+                        t.classList.toggle('portfolio-tab-active', isActive);
                     });
-                    if (!matched) {
-                        var other = Array.prototype.find.call(select.options, function (opt) {
-                            return opt.value === 'Lainnya';
-                        });
-                        if (other) select.value = other.value;
-                        var message = document.getElementById('contact-message');
-                        if (message && !message.value) message.value = 'Halo, saya tertarik dengan: ' + service;
-                    }
-                }
-            }, prefersReducedMotion ? 0 : 600);
-        });
-    });
-
-    /* Skill progress bar */
-    document.querySelectorAll('[data-skill-fill]').forEach(function (el) {
-        var target = Math.max(0, Math.min(100, parseInt(el.getAttribute('data-skill-fill'), 10) || 0));
-        if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-            el.style.width = target + '%';
-            return;
-        }
-        var skillObserver = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (!entry.isIntersecting) return;
-                skillObserver.unobserve(el);
-                requestAnimationFrame(function () {
-                    el.style.width = target + '%';
+                    Array.prototype.forEach.call(portfolioOriginals, function (card) {
+                        var show = portfolioFilter === 'all' || card.classList.contains('filter-' + portfolioFilter);
+                        card.classList.toggle('hidden', !show);
+                    });
+                    portfolioTrack.classList.toggle('is-filtered', portfolioFilter !== 'all');
+                    portfolioTrack.scrollLeft = 0;
+                    refreshPortfolioCarousel();
                 });
             });
-        }, { threshold: 0.4 });
-        skillObserver.observe(el);
-    });
+        }
+    }
+
+    /* Slider + popup galeri halaman detail portfolio.
+       Ter-guard: tidak jalan bila #project-gallery tidak ada (homepage aman). */
+    var gallery = document.getElementById('project-gallery');
+    if (gallery) {
+        var galleryTrack = document.getElementById('project-gallery-track');
+        var galleryPrev = document.getElementById('project-gallery-prev');
+        var galleryNext = document.getElementById('project-gallery-next');
+        var galleryCounter = document.getElementById('project-gallery-counter');
+        var galleryExpand = document.getElementById('project-gallery-expand');
+        var lightbox = document.getElementById('project-lightbox');
+        var lightboxImage = document.getElementById('project-lightbox-image');
+        var lightboxPrev = document.getElementById('project-lightbox-prev');
+        var lightboxNext = document.getElementById('project-lightbox-next');
+        var lightboxClose = document.getElementById('project-lightbox-close');
+        var lightboxCounter = document.getElementById('project-lightbox-counter');
+        var gallerySlides = galleryTrack ? galleryTrack.querySelectorAll('.project-gallery-slide img') : [];
+        var galleryCount = gallerySlides.length;
+        var galleryIndex = 0;
+
+        function galleryLabel(i) {
+            return (i + 1) + ' / ' + galleryCount;
+        }
+
+        function galleryGoTo(i) {
+            if (!galleryCount) return;
+            galleryIndex = ((i % galleryCount) + galleryCount) % galleryCount;
+            if (galleryTrack) {
+                galleryTrack.style.transform = 'translateX(-' + (galleryIndex * 100) + '%)';
+            }
+            if (galleryCounter) galleryCounter.textContent = galleryLabel(galleryIndex);
+            if (lightboxImage) {
+                lightboxImage.src = gallerySlides[galleryIndex].src;
+                lightboxImage.alt = gallerySlides[galleryIndex].alt || 'Pratinjau gambar project';
+            }
+            if (lightboxCounter) lightboxCounter.textContent = galleryLabel(galleryIndex);
+        }
+
+        function galleryOpen(i) {
+            if (!lightbox || !galleryCount) return;
+            galleryGoTo(typeof i === 'number' ? i : galleryIndex);
+            lightbox.hidden = false;
+            document.body.style.overflow = 'hidden';
+            if (lightboxClose) lightboxClose.focus();
+        }
+
+        function galleryClose() {
+            if (!lightbox) return;
+            lightbox.hidden = true;
+            document.body.style.overflow = '';
+        }
+
+        if (galleryCount <= 1) {
+            [galleryPrev, galleryNext, galleryExpand, galleryCounter].forEach(function (el) {
+                if (el) el.style.display = 'none';
+            });
+            [lightboxPrev, lightboxNext].forEach(function (el) {
+                if (el) el.style.display = 'none';
+            });
+        }
+        if (galleryPrev) galleryPrev.addEventListener('click', function () { galleryGoTo(galleryIndex - 1); });
+        if (galleryNext) galleryNext.addEventListener('click', function () { galleryGoTo(galleryIndex + 1); });
+        if (galleryExpand) galleryExpand.addEventListener('click', function () { galleryOpen(galleryIndex); });
+        Array.prototype.forEach.call(gallerySlides, function (img, i) {
+            img.addEventListener('click', function () { galleryOpen(i); });
+        });
+        if (lightboxPrev) lightboxPrev.addEventListener('click', function (e) { e.stopPropagation(); galleryGoTo(galleryIndex - 1); });
+        if (lightboxNext) lightboxNext.addEventListener('click', function (e) { e.stopPropagation(); galleryGoTo(galleryIndex + 1); });
+        if (lightboxClose) lightboxClose.addEventListener('click', galleryClose);
+        if (lightbox) lightbox.addEventListener('click', function (e) {
+            if (e.target === lightbox) galleryClose();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (!lightbox || lightbox.hidden) return;
+            if (e.key === 'Escape') galleryClose();
+            if (e.key === 'ArrowLeft') galleryGoTo(galleryIndex - 1);
+            if (e.key === 'ArrowRight') galleryGoTo(galleryIndex + 1);
+        });
+        var galleryTouchX = null;
+        if (gallery) {
+            gallery.addEventListener('touchstart', function (e) {
+                galleryTouchX = e.touches[0].clientX;
+            }, { passive: true });
+            gallery.addEventListener('touchend', function (e) {
+                if (galleryTouchX === null) return;
+                var dx = e.changedTouches[0].clientX - galleryTouchX;
+                galleryTouchX = null;
+                if (Math.abs(dx) < 40) return;
+                galleryGoTo(galleryIndex + (dx < 0 ? 1 : -1));
+            }, { passive: true });
+        }
+        galleryGoTo(0);
+    }
 
     /* Tahun footer */
     document.querySelectorAll('[data-current-year]').forEach(function (el) {

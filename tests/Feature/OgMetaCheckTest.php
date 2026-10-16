@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\AboutSection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,8 +11,6 @@ class OgMetaCheckTest extends TestCase
 
     public function test_homepage_has_absolute_og_image(): void
     {
-        AboutSection::create(['title' => 'Tentang Kami', 'description' => 'Deskripsi tentang kami.', 'is_active' => true]);
-
         $response = $this->get('/');
         $response->assertOk();
 
@@ -45,8 +42,6 @@ class OgMetaCheckTest extends TestCase
 
     public function test_json_ld_is_valid_person_schema(): void
     {
-        AboutSection::create(['title' => 'Tentang Saya', 'description' => 'Deskripsi profil.', 'is_active' => true]);
-
         $html = $this->get('/')->getContent();
 
         $this->assertSame(

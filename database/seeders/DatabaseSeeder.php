@@ -39,8 +39,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             SettingsSeeder::class,
-            AboutSectionSeeder::class,
-            HeroSectionSeeder::class,
             TimelineItemSeeder::class,
             ServiceSeeder::class,
             ProjectCategorySeeder::class,

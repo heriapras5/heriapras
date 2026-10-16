@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\AboutSection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -45,16 +44,6 @@ class CvTest extends TestCase
         $this->assertStringContainsString('Summary', $html);
         $this->assertStringContainsString('Work Experience', $html);
         $this->assertStringContainsString('Selected Projects', $html);
-    }
-
-    public function test_homepage_shows_cv_download_button(): void
-    {
-        AboutSection::create(['title' => 'Tentang', 'description' => 'Deskripsi.', 'is_active' => true]);
-
-        $html = $this->get('/')->assertOk()->getContent();
-
-        $this->assertStringContainsString('Unduh CV', $html);
-        $this->assertStringContainsString('/cv', $html);
     }
 
     public function test_cv_redirects_to_external_url_when_configured(): void

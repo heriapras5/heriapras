@@ -22,37 +22,31 @@ body { height: 100%; touch-action: manipulation; }
 [x-cloak] { display: none !important; }
 
 .admin-sidebar {
-    background: #ffffff;
-    border-right: 1px solid var(--admin-line);
-    box-shadow: 4px 0 24px rgba(15, 23, 42, 0.06);
+    background: var(--admin-navy);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 4px 0 24px rgba(10, 25, 47, 0.18);
     transition: transform 0.3s ease, width 0.25s ease, opacity 0.2s ease;
 }
 
-/* Tautan nav sidebar (tema terang: menimpa utilitas text-white/* pada blade) */
+/* Tautan nav sidebar (tema gelap: satu-satunya area hitam di admin) */
 .admin-sidebar .sidebar-link {
     transition: all 0.2s;
     position: relative;
     border-radius: 10px;
     margin: 1px 0;
     border-right: 2px solid transparent;
-    color: var(--admin-muted);
+    color: rgba(255, 255, 255, 0.72);
 }
-.admin-sidebar .sidebar-link:hover { background: #f1f5f9; color: var(--admin-primary); }
+.admin-sidebar .sidebar-link:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
 .admin-sidebar .sidebar-link.active {
-    background: #eff6ff;
-    border-right-color: var(--admin-primary);
-    color: var(--admin-primary);
+    background: rgba(59, 130, 246, 0.18);
+    border-right-color: #3b82f6;
+    color: #fff;
 }
-.admin-sidebar .sidebar-link.active svg { color: var(--admin-primary); }
-.admin-sidebar .sidebar-link svg { color: var(--admin-faint); }
-.admin-sidebar .sidebar-link:hover svg,
-.admin-sidebar .sidebar-link.active svg { color: var(--admin-primary); }
 
-/* Label grup nav + teks logo (menimpa text-white/* pada blade) */
-.admin-sidebar nav > div > .sidebar-text { color: var(--admin-faint); }
-.admin-sidebar .sidebar-link .sidebar-text { color: inherit; }
-.admin-sidebar .sidebar-logo-wrap .sidebar-text span:first-child { color: var(--admin-ink); }
-.admin-sidebar .sidebar-logo-wrap .sidebar-text span:last-child { color: var(--admin-primary); }
+/* Label grup nav + teks logo */
+.admin-sidebar .sidebar-logo-wrap .sidebar-text span:first-child { color: #fff; }
+.admin-sidebar .sidebar-logo-wrap .sidebar-text span:last-child { color: rgba(147, 197, 253, 0.9); }
 
 /* Indikator hover: garis vertikal gradien biru tumbuh dari tengah kiri
    (adaptasi pola juneo-phone, aksen diubah ke biru) */
@@ -75,12 +69,12 @@ body { height: 100%; touch-action: manipulation; }
 /* Teks sidebar memudar saat rail ikon (collapse) */
 .sidebar-text { transition: opacity 0.18s ease; }
 
-/* Scrollbar sidebar (terang) */
-.sidebar-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+/* Scrollbar sidebar (gelap) */
+.sidebar-scroll { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
 .sidebar-scroll::-webkit-scrollbar { width: 6px; }
 .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
-.sidebar-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; }
-.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
 
 /* Scrollbar area konten (terang) */
 .content-scroll { touch-action: manipulation; overscroll-behavior: contain; }
@@ -291,7 +285,7 @@ body { height: 100%; touch-action: manipulation; }
 }
 .form-hint {
     font-size: 12px;
-    color: #9ca3af;
+    color: #64748b;
     margin-top: 4px;
 }
 
@@ -301,7 +295,7 @@ body { height: 100%; touch-action: manipulation; }
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: #94a3b8;
+    color: #64748b;
     margin-bottom: 12px;
 }
 .admin-breadcrumb a { transition: color 0.15s; }
@@ -357,8 +351,8 @@ nav[aria-label="Pagination"] a, nav[aria-label="Pagination"] span {
 }
 nav[aria-label="Pagination"] a:hover { background: #e2e8f0; }
 nav[aria-label="Pagination"] span[aria-current="page"] {
-    background: linear-gradient(135deg, #0a192f, #1a365d);
-    color: white; box-shadow: 0 2px 8px rgba(10, 25, 47, 0.25);
+    background: var(--admin-primary);
+    color: white; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 nav[aria-label="Pagination"] .disabled span { opacity: 0.3; cursor: default; }
 
