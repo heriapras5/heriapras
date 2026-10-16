@@ -4,14 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AboutSection;
-use App\Models\Banner;
 use App\Models\Client;
 use App\Models\ContactInfo;
 use App\Models\CtaSection;
-use App\Models\Faq;
 use App\Models\HeroSection;
 use App\Models\Menu;
-use App\Models\Package;
 use App\Models\Partner;
 use App\Models\Project;
 use App\Models\ProjectCategory;
@@ -22,11 +19,8 @@ class StatusController extends Controller
 {
     protected array $map = [
         'hero_sections' => [HeroSection::class, 'status'],
-        'packages' => [Package::class, 'status'],
         'projects' => [Project::class, 'status'],
         'project_categories' => [ProjectCategory::class, 'status'],
-        'faqs' => [Faq::class, 'status'],
-        'banners' => [Banner::class, 'is_active'],
         'clients' => [Client::class, 'status'],
         'partners' => [Partner::class, 'status'],
         'menus' => [Menu::class, 'status'],

@@ -153,7 +153,10 @@ class SettingsController extends Controller
             Setting::updateOrCreate(['key' => 'profile_photo'], ['value' => '', 'group' => 'general', 'type' => 'text']);
         } elseif ($request->hasFile('profile_photo')) {
             deleteFile(Setting::where('key', 'profile_photo')->value('value'));
-            $path = $request->file('profile_photo')->store('settings', 'public');
+            // Nama file diseragamkan menjadi heri-profile.<ext> agar URL foto
+            // hero stabil; cache-buster (?v=filemtime) dipasang di view hero.
+            $ext = $request->file('profile_photo')->extension() ?: 'jpg';
+            $path = $request->file('profile_photo')->storeAs('settings', 'heri-profile.'.$ext, 'public');
             Setting::updateOrCreate(['key' => 'profile_photo'], ['value' => 'storage/'.$path, 'group' => 'general', 'type' => 'text']);
         }
 

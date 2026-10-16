@@ -2,11 +2,8 @@
 
 use App\Http\Controllers\Admin\AboutSectionController;
 use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\BannerController;
-use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\HeroSectionController;
 use App\Http\Controllers\Admin\MessageController;
-use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ProjectCategoryController;
 use App\Http\Controllers\Admin\ProjectController;
 use App\Http\Controllers\Admin\SeoController;
@@ -63,15 +60,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::post('/status/toggle', [StatusController::class, 'toggle'])->name('status.toggle');
     Route::resource('hero-sections', HeroSectionController::class);
-    Route::resource('banners', BannerController::class);
     Route::resource('about-sections', AboutSectionController::class);
     Route::resource('timeline', TimelineItemController::class)->except(['show']);
     Route::resource('services', ServiceController::class)->except(['show']);
     Route::resource('project-categories', ProjectCategoryController::class);
     Route::delete('projects/{project}/images/{image}', [ProjectController::class, 'destroyImage'])->name('projects.images.destroy');
     Route::resource('projects', ProjectController::class);
-    Route::resource('packages', PackageController::class);
-    Route::resource('faqs', FaqController::class);
     Route::resource('messages', MessageController::class)->except(['create', 'store', 'edit', 'update']);
     Route::patch('messages/{message}/toggle-read', [MessageController::class, 'toggleRead'])->name('messages.toggle-read');
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');

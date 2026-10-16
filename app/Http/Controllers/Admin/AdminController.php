@@ -56,7 +56,6 @@ class AdminController extends Controller
         $contentSummary = [
             ['label' => 'Projek', 'count' => \App\Models\Project::count(), 'route' => route('admin.projects.index'), 'icon' => 'folder', 'colors' => ['bg' => 'from-blue-500 to-blue-600', 'iconBg' => 'bg-blue-50', 'iconText' => 'text-blue-600']],
             ['label' => 'Kategori Projek', 'count' => \App\Models\ProjectCategory::count(), 'route' => route('admin.project-categories.index'), 'icon' => 'tag', 'colors' => ['bg' => 'from-indigo-500 to-indigo-600', 'iconBg' => 'bg-indigo-50', 'iconText' => 'text-indigo-600']],
-            ['label' => 'FAQ', 'count' => \App\Models\Faq::count(), 'route' => route('admin.faqs.index'), 'icon' => 'help', 'colors' => ['bg' => 'from-amber-500 to-amber-600', 'iconBg' => 'bg-amber-50', 'iconText' => 'text-amber-600']],
             ['label' => 'Pesan Masuk', 'count' => \App\Models\Message::count(), 'route' => route('admin.messages.index'), 'icon' => 'mail', 'colors' => ['bg' => 'from-slate-500 to-slate-600', 'iconBg' => 'bg-slate-100', 'iconText' => 'text-slate-600']],
         ];
         $totalMessages = \App\Models\Message::count();

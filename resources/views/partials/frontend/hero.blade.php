@@ -5,6 +5,7 @@
     $profilePhotoExists = $profilePhoto
         && ! str_starts_with((string) $profilePhoto, 'http')
         && is_file(public_path(ltrim((string) $profilePhoto, '/')));
+    $profilePhotoVersion = $profilePhotoExists ? filemtime(public_path(ltrim((string) $profilePhoto, '/'))) : null;
 @endphp
 <section id="hero" class="relative overflow-hidden bg-abyss">
     <div class="dots-grid absolute top-16 right-8 md:right-24 w-28 h-24 opacity-60" aria-hidden="true"></div>
@@ -41,7 +42,7 @@
             <div class="relative">
                 <div class="w-72 h-72 md:w-[22rem] md:h-[22rem] rounded-full bg-primary overflow-hidden" aria-hidden="false">
                     @if($profilePhotoExists)
-                        <img src="{{ asset($profilePhoto) }}" alt="Foto {{ $fullName }}"
+                        <img src="{{ asset($profilePhoto) }}{{ $profilePhotoVersion ? '?v='.$profilePhotoVersion : '' }}" alt="Foto {{ $fullName }}"
                              class="w-full h-full object-cover object-top"
                              onerror="this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='flex'">
                         <div class="w-full h-full items-center justify-center bg-primary" style="display:none" aria-hidden="true">
