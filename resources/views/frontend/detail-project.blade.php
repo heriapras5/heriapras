@@ -133,7 +133,6 @@
 @if($relatedProjects->count())
 <section class="bg-abyss border-t border-white/5">
     <div class="max-w-6xl mx-auto px-5 py-12">
-        <p class="eyebrow">Jelajahi lainnya</p>
         <h2 class="section-title mt-2">Portofolio Terkait</h2>
         <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             @foreach($relatedProjects as $related)
