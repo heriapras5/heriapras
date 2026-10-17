@@ -82,7 +82,7 @@
     ]
   },
   "resources/css/frontend.css": {
-    "file": "assets/frontend-Pzh4mKOx.css",
+    "file": "assets/frontend-CGFffFLI.css",
     "src": "resources/css/frontend.css",
     "isEntry": true,
     "name": "frontend",
@@ -115,7 +115,7 @@
     ]
   },
   "resources/js/frontend.js": {
-    "file": "assets/frontend-9rhFPr4a.js",
+    "file": "assets/frontend-C6EKuuvv.js",
     "name": "frontend",
     "src": "resources/js/frontend.js",
     "isEntry": true

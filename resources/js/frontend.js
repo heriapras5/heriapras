@@ -302,6 +302,10 @@
         var lightboxNext = document.getElementById('project-lightbox-next');
         var lightboxClose = document.getElementById('project-lightbox-close');
         var lightboxCounter = document.getElementById('project-lightbox-counter');
+        var lightboxStage = document.getElementById('project-lightbox-stage');
+        var zoomInBtn = document.getElementById('project-lightbox-zoom-in');
+        var zoomOutBtn = document.getElementById('project-lightbox-zoom-out');
+        var zoomResetBtn = document.getElementById('project-lightbox-zoom-reset');
         var gallerySlides = galleryTrack ? galleryTrack.querySelectorAll('.project-gallery-slide img') : [];
         var galleryCount = gallerySlides.length;
         var galleryIndex = 0;
@@ -317,6 +321,9 @@
         var DRAG_VELOCITY = 0.5;    /* px/ms: flick tetap pindah walau jarak kecil */
         var DRAG_DIST_RATIO = 0.15; /* ambang jarak = 15% lebar (clamp 42-96px) */
         var CLICK_GUARD_MS = 350;   /* blokir klik pasca-drag */
+        var LB_ZOOM_MAX = 4;        /* batas zoom maksimal */
+        var LB_ZOOM_STEP = 0.6;     /* langkah tombol + / - */
+        var LB_WHEEL_FACTOR = 1.15; /* faktor zoom per putaran wheel */
 
         /* State animasi popup */
         var lbCloseTimer = null;    /* menutup: set hidden setelah fade selesai */
@@ -329,6 +336,17 @@
         /* State gestur slider halaman */
         var dragIndex = 0;
         var dragWidth = 1;
+
+        /* State zoom/pan popup */
+        var lbZoom = 1;
+        var lbPanX = 0;
+        var lbPanY = 0;
+        var stageTouchMode = null;  /* 'pinch' | 'pan' | null */
+        var pinchStartDist = 0;
+        var pinchStartZoom = 1;
+        var panStartX = 0, panStartY = 0, panOriginX = 0, panOriginY = 0;
+        var tapStartX = 0, tapStartY = 0, tapStartTime = 0, tapMoved = false;
+        var lastTapTime = 0;
 
         var clickGuardUntil = 0;    /* timestamp; klik palsu pasca-drag diblokir */
 
@@ -473,6 +491,7 @@
 
         function setLightboxImage(index, dir) {
             if (!lightboxImage || !gallerySlides[index]) return;
+            lbResetZoom();                                  /* ganti gambar: kembalikan ke fit */
             var slide = gallerySlides[index];
             var dragPx = lbSwitchPx;
             lbSwitchPx = 0;
@@ -519,6 +538,56 @@
             lbLoadTimer = setTimeout(function () { lbFinishSwitch(token); }, LB_LOAD_MS);
         }
 
+        /* ---------- popup: zoom & pan gambar ---------- */
+        function lbApplyZoom() {
+            if (!lightboxStage) return;
+            lightboxStage.style.setProperty('--lb-zoom', lbZoom);
+            lightboxStage.style.setProperty('--lb-pan-x', lbPanX + 'px');
+            lightboxStage.style.setProperty('--lb-pan-y', lbPanY + 'px');
+            if (lightbox) lightbox.classList.toggle('is-zoomed', lbZoom > 1.001);
+            if (zoomInBtn) zoomInBtn.disabled = lbZoom >= LB_ZOOM_MAX - 0.001;
+            if (zoomOutBtn) zoomOutBtn.disabled = lbZoom <= 1.001;
+        }
+
+        /* Batasi pan agar gambar tidak keluar viewport (ukuran layout abaikan transform). */
+        function lbClampPan() {
+            if (!lightboxImage) return;
+            var maxX = Math.max(0, (lightboxImage.offsetWidth * (lbZoom - 1)) / 2);
+            var maxY = Math.max(0, (lightboxImage.offsetHeight * (lbZoom - 1)) / 2);
+            if (lbPanX > maxX) lbPanX = maxX;
+            else if (lbPanX < -maxX) lbPanX = -maxX;
+            if (lbPanY > maxY) lbPanY = maxY;
+            else if (lbPanY < -maxY) lbPanY = -maxY;
+        }
+
+        /* Zoom ber-anchor titik (clientX, clientY); transform-origin stage = pusat popup. */
+        function lbZoomAt(nextZoom, clientX, clientY) {
+            if (!lightbox || !lightboxImage) return;
+            nextZoom = Math.max(1, Math.min(LB_ZOOM_MAX, nextZoom));
+            if (Math.abs(nextZoom - lbZoom) < 0.001) return;
+            var rect = lightbox.getBoundingClientRect();
+            var cx = clientX - rect.left - rect.width / 2;
+            var cy = clientY - rect.top - rect.height / 2;
+            var ratio = nextZoom / lbZoom;
+            lbPanX = cx - (cx - lbPanX) * ratio;
+            lbPanY = cy - (cy - lbPanY) * ratio;
+            lbZoom = nextZoom;
+            if (lbZoom <= 1.001) {           /* kembali ke fit: tanpa pan */
+                lbZoom = 1;
+                lbPanX = 0;
+                lbPanY = 0;
+            }
+            lbClampPan();
+            lbApplyZoom();
+        }
+
+        function lbResetZoom() {
+            lbZoom = 1;
+            lbPanX = 0;
+            lbPanY = 0;
+            lbApplyZoom();
+        }
+
         /* ---------- popup: buka/tutup beranimasi ---------- */
         function galleryOpen(i) {
             if (!lightbox || !galleryCount) return;
@@ -551,6 +620,7 @@
         function galleryClose() {
             if (!lightbox || lightbox.hidden || lbClosing) return;
             lbClosing = true;
+            lbResetZoom();
             lbToken++;                                      /* hentikan rantai ganti gambar */
             clearTimeout(lbOutTimer); lbOutTimer = null;
             clearTimeout(lbLoadTimer); lbLoadTimer = null;
@@ -619,7 +689,8 @@
                 canStart: function () {
                     return galleryCount > 1 && !!lightboxImage && !lbClosing &&
                         lightbox.classList.contains('is-open') &&
-                        !lightboxImage.classList.contains('is-switching');
+                        !lightboxImage.classList.contains('is-switching') &&
+                        lbZoom <= 1.001;
                 },
                 followStart: function () {
                     lightboxImage.classList.add('is-dragging');
@@ -698,10 +769,128 @@
         });
         document.addEventListener('keydown', function (e) {
             if (!lightbox || lightbox.hidden || lbClosing) return;
-            if (e.key === 'Escape') galleryClose();
+            if (e.key === 'Escape') {
+                if (lbZoom > 1.001) lbResetZoom(); else galleryClose();
+                return;
+            }
+            if (lbZoom > 1.001) return;                     /* saat zoom, panah tidak navigasi */
             if (e.key === 'ArrowLeft') galleryGoTo(galleryIndex - 1);
             if (e.key === 'ArrowRight') galleryGoTo(galleryIndex + 1);
         });
+
+        /* ---------- kontrol zoom ---------- */
+        if (zoomInBtn) zoomInBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var rect = lightbox.getBoundingClientRect();
+            lbZoomAt(lbZoom + LB_ZOOM_STEP, rect.left + rect.width / 2, rect.top + rect.height / 2);
+        });
+        if (zoomOutBtn) zoomOutBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var rect = lightbox.getBoundingClientRect();
+            lbZoomAt(lbZoom - LB_ZOOM_STEP, rect.left + rect.width / 2, rect.top + rect.height / 2);
+        });
+        if (zoomResetBtn) zoomResetBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            lbResetZoom();
+        });
+
+        if (lightbox) lightbox.addEventListener('wheel', function (e) {
+            if (lightbox.hidden || !lightboxImage) return;
+            e.preventDefault();
+            var factor = e.deltaY < 0 ? LB_WHEEL_FACTOR : 1 / LB_WHEEL_FACTOR;
+            lbZoomAt(lbZoom * factor, e.clientX, e.clientY);
+        }, { passive: false });
+
+        if (lightboxImage) lightboxImage.addEventListener('dblclick', function (e) {
+            e.preventDefault();
+            if (lbZoom > 1.001) lbResetZoom();
+            else lbZoomAt(2, e.clientX, e.clientY);
+        });
+
+        /* Pinch-zoom & pan pada stage. Swipe navigasi dinonaktifkan saat zoom. */
+        if (lightboxStage) {
+            lightboxStage.addEventListener('touchstart', function (e) {
+                if (!lightbox || lightbox.hidden) return;
+                tapMoved = false;
+                if (e.touches.length === 2) {
+                    stageTouchMode = 'pinch';
+                    pinchStartDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    ) || 1;
+                    pinchStartZoom = lbZoom;
+                    lightboxStage.classList.add('is-panning');
+                } else if (e.touches.length === 1 && lbZoom > 1.001) {
+                    stageTouchMode = 'pan';
+                    panStartX = e.touches[0].clientX;
+                    panStartY = e.touches[0].clientY;
+                    panOriginX = lbPanX;
+                    panOriginY = lbPanY;
+                    lightboxStage.classList.add('is-panning');
+                } else {
+                    stageTouchMode = null;
+                    if (e.touches.length === 1) {
+                        tapStartX = e.touches[0].clientX;
+                        tapStartY = e.touches[0].clientY;
+                        tapStartTime = performance.now();
+                    }
+                }
+            }, { passive: true });
+
+            lightboxStage.addEventListener('touchmove', function (e) {
+                if (e.touches.length === 1) {
+                    var ddx = e.touches[0].clientX - tapStartX;
+                    var ddy = e.touches[0].clientY - tapStartY;
+                    if (Math.abs(ddx) > 8 || Math.abs(ddy) > 8) tapMoved = true;
+                }
+                if (stageTouchMode === 'pinch' && e.touches.length === 2) {
+                    var dist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    ) || 1;
+                    var midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    var midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                    lbZoomAt(pinchStartZoom * (dist / pinchStartDist), midX, midY);
+                    tapMoved = true;
+                    e.preventDefault();
+                } else if (stageTouchMode === 'pan' && e.touches.length === 1) {
+                    lbPanX = panOriginX + (e.touches[0].clientX - panStartX);
+                    lbPanY = panOriginY + (e.touches[0].clientY - panStartY);
+                    lbClampPan();
+                    lbApplyZoom();
+                    tapMoved = true;
+                    e.preventDefault();
+                }
+            }, { passive: false });
+
+            lightboxStage.addEventListener('touchend', function (e) {
+                var wasPinchOrPan = stageTouchMode === 'pinch' || stageTouchMode === 'pan';
+                if (wasPinchOrPan) armClickGuard();
+                stageTouchMode = null;
+                lightboxStage.classList.remove('is-panning');
+                /* Double-tap toggle zoom (hanya bila bukan pinch/pan). */
+                if (!wasPinchOrPan && !tapMoved && e.touches.length === 0) {
+                    var now = performance.now();
+                    if (now - tapStartTime < 300) {
+                        if (now - lastTapTime < 300) {
+                            lastTapTime = 0;
+                            if (lbZoom > 1.001) lbResetZoom();
+                            else lbZoomAt(2, tapStartX, tapStartY);
+                        } else {
+                            lastTapTime = now;
+                        }
+                    }
+                }
+            }, { passive: true });
+
+            lightboxStage.addEventListener('touchcancel', function () {
+                stageTouchMode = null;
+                lightboxStage.classList.remove('is-panning');
+            }, { passive: true });
+        }
+
+        lbApplyZoom();
+
         galleryGoTo(0);
     }
 

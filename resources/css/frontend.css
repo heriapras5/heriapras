@@ -551,6 +551,7 @@ html.js .reveal.revealed {
 @media (prefers-reduced-motion: reduce) {
     .project-gallery-track,
     .project-lightbox,
+    .project-lightbox-stage,
     .project-lightbox img {
         transition: none;
     }
@@ -564,7 +565,9 @@ html.js .reveal.revealed {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(4, 4, 12, 0.92);
+    background: rgba(4, 4, 12, 0.72);
+    -webkit-backdrop-filter: blur(10px) saturate(120%);
+    backdrop-filter: blur(10px) saturate(120%);
     padding: 1rem;
     /* Geser horizontal ditangani JS; biarkan browser menangani pan vertikal. */
     touch-action: pan-y;
@@ -579,6 +582,35 @@ html.js .reveal.revealed {
 
 .project-lightbox[hidden] {
     display: none;
+}
+
+/* Stage zoom/pan: transform terpisah dari animasi buka/tutup & crossfade pada <img>. */
+.project-lightbox-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    --lb-zoom: 1;
+    --lb-pan-x: 0px;
+    --lb-pan-y: 0px;
+    transform: translate(var(--lb-pan-x), var(--lb-pan-y)) scale(var(--lb-zoom));
+    transform-origin: center center;
+    transition: transform 0.24s cubic-bezier(0.22, 0.61, 0.36, 1);
+    will-change: transform;
+    touch-action: pan-y;
+}
+
+.project-lightbox-stage.is-panning {
+    transition: none;
+    cursor: grabbing;
+}
+
+.project-lightbox.is-zoomed .project-lightbox-stage {
+    cursor: grab;
+    touch-action: none;
+}
+
+.project-lightbox-stage img {
+    display: block;
 }
 
 .project-lightbox img {
@@ -634,6 +666,43 @@ html.js .reveal.revealed {
 .project-lightbox-close:hover {
     border-color: var(--color-primary);
     background: rgba(124, 58, 237, 0.4);
+}
+
+.project-lightbox-zoom {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 2;
+}
+
+.project-lightbox-zoom-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20, 20, 50, 0.9);
+    border: 1px solid var(--color-card-border);
+    color: #fff;
+    cursor: pointer;
+}
+
+.project-lightbox-zoom-btn:hover {
+    border-color: var(--color-primary);
+    background: rgba(124, 58, 237, 0.4);
+}
+
+.project-lightbox-zoom-btn[disabled] {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.project-lightbox-zoom-btn[disabled]:hover {
+    border-color: var(--color-card-border);
+    background: rgba(20, 20, 50, 0.9);
 }
 
 .project-lightbox-counter {

@@ -54,10 +54,23 @@
                 <button id="project-lightbox-prev" type="button" class="project-gallery-nav project-gallery-prev" aria-label="Gambar sebelumnya">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
                 </button>
-                <img id="project-lightbox-image" src="" alt="">
+                <div id="project-lightbox-stage" class="project-lightbox-stage">
+                    <img id="project-lightbox-image" src="" alt="">
+                </div>
                 <button id="project-lightbox-next" type="button" class="project-gallery-nav project-gallery-next" aria-label="Gambar berikutnya">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
                 </button>
+                <div class="project-lightbox-zoom" role="group" aria-label="Kontrol zoom gambar">
+                    <button id="project-lightbox-zoom-out" type="button" class="project-lightbox-zoom-btn" aria-label="Perkecil gambar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg>
+                    </button>
+                    <button id="project-lightbox-zoom-reset" type="button" class="project-lightbox-zoom-btn" aria-label="Reset zoom gambar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+                    </button>
+                    <button id="project-lightbox-zoom-in" type="button" class="project-lightbox-zoom-btn" aria-label="Perbesar gambar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg>
+                    </button>
+                </div>
                 <span id="project-lightbox-counter" class="project-lightbox-counter"></span>
             </div>
             @else
